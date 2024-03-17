@@ -1,5 +1,6 @@
-from mining_cc.flask_server.flask_server import run
+from mining_cc.server.server_class import Server
 
 
 if __name__ == '__main__':
-    run()
+    server = Server()
+    server.run()

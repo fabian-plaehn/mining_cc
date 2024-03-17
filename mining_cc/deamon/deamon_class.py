@@ -128,6 +128,7 @@ class Deamon:
                     logger("exe started")
                 except PermissionError:
                     os.popen(f"sudo chmod u+x {path_to_client_exe}")
+                    self.start_check_client()
             if self.client_process is not None and not psutil.pid_exists(self.client_process.pid):
                 self.client_process = None
         except FileNotFoundError:

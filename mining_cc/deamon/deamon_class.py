@@ -168,7 +168,7 @@ class Deamon:
                     logger(f"hash_server:  {hash_server}")
                     logger(f"hash deamon: {hash}")
                     if hash != hash_server:
-                        self.client_socket.send(request_new_client())
+                        self.client_socket.send(request_new_client({"OS_System":os_system}))
                 self.check_client_version()
                 self.start_check_client()
                 time.sleep(1)

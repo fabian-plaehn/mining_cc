@@ -78,7 +78,9 @@ class Miner_Info:
     def start(self):
         if self.process is None:
             logger(f"Start miner: {self.name}")
-            try: self.process = subprocess.Popen(f"cd {self.name} &&  {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+            try: 
+                self.process = subprocess.Popen(f"cd {self.name} &&  {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                print("process started")
             except PermissionError:
                 os.popen(f"sudo chmod u+x {self.name}/{self.exe_name}")
                 self.start()

@@ -13,7 +13,7 @@ import psutil
 from mining_cc.shared.connection import connect_to_server
 from mining_cc.shared.ProtoHeader import *
 from mining_cc.shared.hashes import single_file_hash, dirhash
-from mining_cc.shared.utils import logger
+from mining_cc.shared.utils import kill_process_and_children, logger, payload_to_dict
 import threading
 
 os_system = platform.system().lower()
@@ -47,8 +47,8 @@ class Deamon:
             logger("config not found. Creating one", "info")
             config = {}
         config["Connection"] = {}
-        config["Connection"]["id"] = f"{socket.gethostbyname(socket.gethostname())}_deamon"
-        config["Connection"]["host"] = socket.gethostbyname(socket.gethostname())
+        config["Connection"]["id"] = f"{socket.gethostname()}_deamon"
+        config["Connection"]["host"] = tailscale_ip
         config["Connection"]["port"] = 5001
         with open("client_config.json", "w") as f:
             f.write(json.dumps(config, indent=2))
@@ -75,7 +75,7 @@ class Deamon:
             
             if self.client_process is not None:
                 logger("Shutting down client process")
-                self.client_process.kill()
+                kill_process_and_children(self.client_process.pid)
                 while psutil.pid_exists(self.client_process.pid):
                     pass
                 self.client_process = None
@@ -84,8 +84,8 @@ class Deamon:
             FORMAT = "utf-8"
             
             self.client_socket.setblocking(True)
-            filename = paylod["filename"]
-            filesize = paylod["filesize"]
+            filename = paylod["file_name"]
+            filesize = paylod["file_size"]
             file_size = int(filesize)
             logger(f"File size received: {file_size} bytes")
             logger(f"File name received: {filename} bytes")
@@ -98,15 +98,6 @@ class Deamon:
                 if type_request == Send_Client_Finished:
                     break
                 packet += payload
-            '''while len(packet) < file_size:
-                if (file_size - len(packet)) > SIZE:  # if remaining bytes are more than the defined chunk size
-                    buffer = self.client_socket.recv(SIZE)  # read SIZE bytes
-                else:
-                    buffer = self.client_socket.recv(file_size - len(packet))  # read remaining number of bytes
-
-                if not buffer:
-                    raise Exception("Incomplete file received")
-                packet += buffer'''
             with open(path_to_client_exe, 'wb') as f:
                 f.write(packet)
 
@@ -131,10 +122,12 @@ class Deamon:
         try:
             if self.client_process is None:
                 try:
+                    logger("starting process?")
                     self.client_process = subprocess.Popen(path_to_client_exe)
+                    print(self.client_process, self.client_process.pid)
+                    logger("exe started")
                 except PermissionError:
-                    subprocess.Popen(f"chmod u+x {path_to_client_exe}")
-                    self.start_check_client()
+                    os.popen(f"sudo chmod u+x {path_to_client_exe}")
             if self.client_process is not None and not psutil.pid_exists(self.client_process.pid):
                 self.client_process = None
         except FileNotFoundError:
@@ -143,15 +136,12 @@ class Deamon:
     def run(self):
         self.start_check_client()
         self.client_socket = connect_to_server(self.host, self.port)
-        # TODO move login and check client up here
-        # client will only get updated after server restart anyway
+        check_every = 10
+        last_check_time = time.time() - check_every
         try:
             while True:
                 request_typ, payload = receive_proto_block(self.client_socket)
-                try:
-                    payload = json.loads(payload.decode().replace("'", '"'))
-                except (AttributeError, json.JSONDecodeError):
-                    pass
+                payload = payload_to_dict(payload)
                 if request_typ == ExitRequest:
                     logger("ExitRequest received")
                     self.client_socket = connect_to_server(self.host, self.port)
@@ -168,10 +158,12 @@ class Deamon:
                     logger(f"hash_server:  {hash_server}")
                     logger(f"hash deamon: {hash}")
                     if hash != hash_server:
-                        self.client_socket.send(request_new_client())
-                self.check_client_version()
-                self.start_check_client()
-                time.sleep(1)
+                        self.client_socket.send(request_new_client({"OS_System":os_system}))
+                
+                if (time.time() - last_check_time) > check_every:
+                    self.check_client_version()
+                    self.start_check_client()
+                    last_check_time = time.time()
                 
         except ConnectionResetError:
             self.run()

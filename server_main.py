@@ -1,6 +1,5 @@
-from mining_cc.server.server_class import Server
+from mining_cc.server.server_class import run
 
 
 if __name__ == '__main__':
-    server = Server()
-    server.run()
+    run()

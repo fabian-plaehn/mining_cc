@@ -24,8 +24,9 @@ status_data = json.loads(status_data)
 tailscale_ip = status_data["TailscaleIPs"][0]
 
 class Miner_Info:
-    def __init__(self, name, run_always) -> None:
+    def __init__(self, name, run_always, exe_name) -> None:
         self.name = name
+        self.exe_name = exe_name
         self.run_always = run_always
         self.process = None
         self.active = False
@@ -61,7 +62,7 @@ class Miner_Info:
     def start(self):
         if self.process is None:
             logger(f"Start miner: {self.name}")
-            self.process = subprocess.Popen(f"cd {self.name} &&  xmrigDaemon", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+            self.process = subprocess.Popen(f"cd {self.name} &&  {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
         
     def stop(self):
         self.active = False

@@ -1,4 +1,5 @@
 import datetime
+import json
 
 import psutil
 
@@ -6,6 +7,13 @@ import psutil
 _debug = False
 _info = True
 _trace = False
+
+def payload_to_dict(payload):
+    try:
+        payload = json.loads(payload.decode().replace("'", '"'))
+    except (AttributeError, json.JSONDecodeError, UnicodeDecodeError):
+        return payload
+    return payload
 
 def get_process_id_and_childen(pid: int, sig: int = 15):
     proc_id_list = []

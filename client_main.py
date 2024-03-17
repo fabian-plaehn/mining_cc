@@ -1,4 +1,4 @@
-from mining_cc.client.flask_client import run
+from mining_cc.client.client_class import Client
 
 if __name__ == "__main__":
-    run()
+    Client().run()

@@ -210,6 +210,7 @@ def download_deamon(os_system):
         return Response(400)
     global app
     print("download deamon_received", os.getcwd() + "/" + path_to_client)
+    shutil.make_archive(os.getcwd() + "/" + server_folder + "/" + filename, "zip", os.getcwd() + "/" + server_folder + "/" + filename)
     return send_from_directory(directory=os.getcwd() + "/" + server_folder, path=filename,
                                as_attachment=True, download_name=filename,mimetype='application/x-binary')
 

@@ -4,7 +4,6 @@ import platform
 import shutil
 import socket
 import subprocess
-from subprocess import CREATE_NEW_CONSOLE
 import time
 import threading
 from flask import Flask, request, Response

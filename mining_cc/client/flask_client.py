@@ -32,11 +32,14 @@ class Miner_Info:
         if self.active:
             logger(f"Miner {self.name} already active")
             pass
-        self.active = True
+        
         logger(f"Activate miner: {self.name}")
-        with open(f"{self.name}/config.json", "r") as f:
-            miner_config = json.load(f)
-            
+        try:
+            with open(f"{self.name}/config.json", "r") as f:
+                miner_config = json.load(f)
+        except FileNotFoundError:
+            return 
+        
         if self.run_always:
             miner_config["cpu"]["enabled"] = True
             
@@ -45,6 +48,7 @@ class Miner_Info:
         with open(f"{self.name}/config.json", "w") as f:
             json.dump(miner_config, f)
             
+        self.active = True 
         self.start()
         
     def restart(self):
@@ -61,8 +65,11 @@ class Miner_Info:
         if not self.run_always:
             self.kill()
         else:
-            with open(f"{self.name}/config.json", "r") as f:
-                miner_config = json.load(f)
+            try:
+                with open(f"{self.name}/config.json", "r") as f:
+                    miner_config = json.load(f)
+            except FileNotFoundError:
+                return
             miner_config["cpu"]["enabled"] = False
             with open(f"{self.name}/config.json", "w") as f:
                 json.dump(miner_config, f)
@@ -141,7 +148,7 @@ def main_run():
     check_every = 10
     last_check_time = time.time() - check_every
     while True:
-        if keyboard.is_pressed('q'):
+        if keyboard.is_pressed('e'):
             logger("shutting down detected")
             requests.get(f"http://{socket.gethostbyname(socket.gethostname())}:{5002}/shutdown")
             break

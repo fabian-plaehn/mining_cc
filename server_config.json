@@ -1,9 +1,14 @@
 {
   "Connections": {
     "100.96.210.95": {
-      "Sheet": "XMR"
+      "Sheet": "XMR",
+      "Last_seen": "2024/03/17 18:01:46"
     },
     "100.96.210.95_deamon": {
+      "Sheet": "XMR",
+      "Last_seen": "2024/03/17 18:01:46"
+    },
+    "127.0.0.1_deamon": {
       "Sheet": "XMR"
     }
   }

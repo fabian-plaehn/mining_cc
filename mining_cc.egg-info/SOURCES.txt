@@ -12,12 +12,3 @@ mining_cc/shared/__init__.py
 mining_cc/shared/connection.py
 mining_cc/shared/hashes.py
 mining_cc/shared/utils.py
-test/__init__.py
-test/check_sum.py
-test/dict_test.py
-test/dir_json.py
-test/flask_test_client.py
-test/flask_test_server.py
-test/payload_class.py
-test/telegram_test.py
-test/zip_test.py

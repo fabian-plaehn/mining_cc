@@ -7,6 +7,7 @@ import threading
 from flask import Flask, request, Response
 import psutil
 import requests
+import platform
 
 from mining_cc.shared.hashes import single_file_hash
 from mining_cc.shared.utils import logger
@@ -18,6 +19,7 @@ server_ip = "100.96.210.95"
 server_port = 5000
 path_to_client_exe = f"{client_folder_name}/{client_file_name}"
 client_process = None
+os_system = platform.system().lower()
 
 class Client_Info:
     def __init__(self, ip, port, name, time_stamp) -> None:
@@ -41,7 +43,7 @@ def download_new_client():
         while psutil.pid_exists(client_process.pid):
             pass
         client_process = None
-    resp = requests.get(f"http://{server_ip}:{server_port}/new_client")
+    resp = requests.get(f"http://{server_ip}:{server_port}/{os_system}/new_client")
     if not resp.ok:
         return 
     fd = open(path_to_client_exe, "wb")
@@ -56,7 +58,7 @@ def check_client_version():
     if not os.path.isfile(f"{client_folder_name}/{client_file_name}"):
         download_new_client()
     else:
-        resp = requests.get(f"http://{server_ip}:{server_port}/new_client_hash")
+        resp = requests.get(f"http://{server_ip}:{server_port}/{os_system}/new_client_hash")
         if not resp.ok:
             return 
         server_hash = resp.content.decode()

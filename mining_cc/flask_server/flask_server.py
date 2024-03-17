@@ -17,10 +17,16 @@ app.use_x_sendfile = True
 
 
 server_folder_name = "Server_Folder"
-client_file_name = "client_main.exe"
-deamon_file_name = "deamon_main.bin"
-path_to_client_exe = f"{server_folder_name}/{client_file_name}"
-path_to_deamon_exe = f"{server_folder_name}/{deamon_file_name}"
+
+client_file_name = "client_main"
+deamon_file_name = "deamon_main"
+
+path_to_client_windows = server_folder_name + "/windows/" + client_file_name + ".exe"
+path_to_client_linux = server_folder_name + "/linux/" + client_file_name + ".bin"
+
+path_to_deamon_windows = server_folder_name + "/windows/" + deamon_file_name + ".exe"
+path_to_deamon_linux = server_folder_name + "/linux/" + deamon_file_name + ".bin"
+
 
 class Client_Info:
     def __init__(self, ip, port, name, time_stamp) -> None:
@@ -48,28 +54,49 @@ def login_server():
     return Response(status=200)
 
 
-@app.route('/new_client', methods=["GET"])
-def send_client():
-    return Response(open(path_to_client_exe, "rb"), headers={"filename":"client_main.exe"})
+@app.route('/<os_version>/new_client', methods=["GET"])
+def send_client(os_version):
+    if os_version == "windows":
+        path_to_client = path_to_client_windows
+        filename = client_file_name + ".exe"
+    elif os_version == "linux":
+        path_to_client = path_to_client_linux
+        filename = client_file_name + ".bin"
+    else:
+        return Response(400)
+    return Response(open(path_to_client, "rb"), headers={"filename":filename})
 
-
-
-
-@app.route('/new_client_hash', methods=["GET"])
-def send_client_hash():
-    if not os.path.isfile(path_to_client_exe):
+@app.route('/<os_version>/new_client_hash', methods=["GET"])
+def send_client_hash(os_version):
+    if os_version == "windows":
+        path_to_client = path_to_client_windows
+        filename = client_file_name + ".exe"
+    elif os_version == "linux":
+        path_to_client = path_to_client_linux
+        filename = client_file_name + ".bin"
+    else:
+        return Response(400)
+        
+    if not os.path.isfile(path_to_client):
         logger("client_main.exe not found")
         return 0
-    hash = str(single_file_hash(path_to_client_exe))
+    hash = str(single_file_hash(path_to_client))
     
     print(f"Client Hash: {hash}")
-    return Response(str(hash).encode(), headers={"filename":"client_main.exe"})
+    return Response(str(hash).encode(), headers={"filename":filename})
 
-@app.route('/new_miner_hashes', methods=["GET"])
-def send_miner_hashes():
+@app.route('/<os_version>/new_miner_hashes', methods=["GET"])
+def send_miner_hashes(os_version):
+    if os_version == "windows":
+        server_folder = server_folder_name + "/windows"
+    elif os_version == "linux":
+        server_folder = server_folder_name + "/linux"
+    else:
+        return Response(400)
+    
     hash_json = {}
-    for file in os.listdir(server_folder_name):
-        file_path = server_folder_name + "/" + file
+    for file in os.listdir(server_folder):
+        file_path = server_folder + "/" + file
         if not os.path.isdir(file_path):
             continue
         # is dir
@@ -78,12 +105,18 @@ def send_miner_hashes():
     print(hash_json)
     return Response(str(hash_json).encode(), status=200)
 
-@app.route('/new_miner', methods=["GET"])
-def send_new_miner():
+@app.route('/<os_version>/new_miner', methods=["GET"])
+def send_new_miner(os_version):
+    if os_version == "windows":
+        server_folder = server_folder_name + "/windows"
+    elif os_version == "linux":
+        server_folder = server_folder_name + "/linux"
+    else:
+        return Response(400)
     print(request.data)
     foldername = json.loads(request.data)["foldername"]
-    shutil.make_archive(server_folder_name + "/" + foldername, "zip", server_folder_name + "/" + foldername)
-    return Response(open(server_folder_name + "/" + foldername + ".zip", "rb"), status=200)
+    shutil.make_archive(server_folder + "/" + foldername, "zip", server_folder + "/" + foldername)
+    return Response(open(server_folder + "/" + foldername + ".zip", "rb"), status=200)
 
 
 '''fd = open("my_file.exe", "wb")
@@ -163,12 +196,23 @@ def run():
     logger("Thread ended")
     stop_server()
     
-@app.route('/download_deamon')
-def download_deamon():
+@app.route('/<os_system>/download_deamon')
+def download_deamon(os_system):
+    if os_system == "windows":
+        path_to_client = path_to_deamon_windows
+        filename = deamon_file_name + ".exe"
+        server_folder = server_folder_name + "/windows"
+    elif os_system == "linux":
+        path_to_client = path_to_deamon_linux
+        filename = deamon_file_name + ".bin"
+        server_folder = server_folder_name + "/linux"
+    else:
+        return Response(400)
     global app
-    print("download deamon_received", os.getcwd() + "/" + path_to_deamon_exe)
-    return send_from_directory(directory=os.getcwd() + "/" + server_folder_name, path=deamon_file_name,
-                               as_attachment=True, download_name="deamon_main.bin",mimetype='application/octet-stream')
+    print("download deamon_received", os.getcwd() + "/" + path_to_client)
+    return send_from_directory(directory=os.getcwd() + "/" + server_folder, path=filename,
+                               as_attachment=True, download_name=filename,mimetype='application/octet-stream')
+
 
 if __name__ == "__main__":
     run()

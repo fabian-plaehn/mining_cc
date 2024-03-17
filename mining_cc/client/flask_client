@@ -1,5 +1,6 @@
 import json
 import os
+import platform
 import shutil
 import socket
 import subprocess
@@ -16,6 +17,8 @@ from mining_cc.shared.utils import kill_process_and_children, logger, merge
 from werkzeug.serving import make_server
 
 app = Flask(__name__)
+
+os_system = platform.system().lower()
 
 class Miner_Info:
     def __init__(self, name, run_always) -> None:
@@ -93,7 +96,7 @@ client_process = None
 
 def download_miner_folder(foldername):
     global miner_info_dict
-    resp = requests.get(f"http://{server_ip}:{server_port}/new_miner", json={"foldername":foldername})
+    resp = requests.get(f"http://{server_ip}:{server_port}/{os_system}/new_miner", json={"foldername":foldername})
     if not resp.ok:
         return 
     fd = open(foldername + ".zip", "wb")
@@ -117,7 +120,7 @@ def check_miner_versions():
         hash_d = dirhash(file_path, excluded_files=["config.json"])
         hash_json[file] = hash_d
     logger(hash_json)
-    resp = requests.get(f"http://{server_ip}:{server_port}/new_miner_hashes")
+    resp = requests.get(f"http://{server_ip}:{server_port}/{os_system}/new_miner_hashes")
     if not resp.ok:
             return 
     server_hashes = json.loads(resp.content.decode().replace("'",'"'))

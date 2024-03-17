@@ -4,7 +4,6 @@ import platform
 import shutil
 import socket
 import subprocess
-from subprocess import CREATE_NEW_CONSOLE
 import time
 import threading
 from flask import Flask, request, Response
@@ -116,7 +115,8 @@ def download_miner_folder(foldername):
     
     miner_info_dict[foldername].currently_updating = True
     miner_info_dict[foldername].kill()
-    
+    if os.path.isdir(foldername):
+        shutil.rmtree(f"{foldername}")
     try:
         shutil.unpack_archive(f"{foldername}.zip", f"{foldername}")
     except PermissionError:

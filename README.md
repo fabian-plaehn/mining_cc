@@ -4,6 +4,7 @@
 # pip install -e .
 
 # sudo -i / sudo apt-get install python3-dev
+# pkg_ressources -> pip install setuptools
 
 # sudo -s get root
 

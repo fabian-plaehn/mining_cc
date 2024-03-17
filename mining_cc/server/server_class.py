@@ -20,7 +20,7 @@ from flask import Flask, request
 
 server_folder_name = "Server_Folder"
 client_file_name = "client_main.exe"
-path_to_client_exe = f"{server_folder_name}/{client_file_name}"
+path_to_client_exe = f"{server_folder_name}/windows/{client_file_name}"
 
 class Server:
     def __init__(self):

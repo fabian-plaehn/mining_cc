@@ -62,8 +62,8 @@
         {
             "algo": null,
             "coin": null,
-            "url": "de.zephyr.herominers.com:1124",
-            "user": "ZEPHYR2Kur2T72QpzZRqpBRAHXhRT6TLsV2GibYHpubiZYWUpC39gFDW8GYZ9ev4Bd5T7xZN96TWH9ZwZkQ5qRwgKkWBwSsFZRP41",
+            "url": "stratum.xdag.org:23655",
+            "user": "C9vpePe8VCrHqSjDZedSNjNMBCEMipNjA",
             "pass": "x",
             "rig-id": null,
             "nicehash": false,

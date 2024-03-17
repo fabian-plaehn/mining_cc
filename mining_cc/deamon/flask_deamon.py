@@ -94,8 +94,6 @@ def main_run():
         start_check_client()
         time.sleep(10)
     
-
-
 def run():
     t = threading.Thread(target=main_run)
     t.start()

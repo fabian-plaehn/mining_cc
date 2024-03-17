@@ -18,7 +18,7 @@ app.use_x_sendfile = True
 
 server_folder_name = "Server_Folder"
 client_file_name = "client_main.exe"
-deamon_file_name = "deamon_main.exe"
+deamon_file_name = "deamon_main.bin"
 path_to_client_exe = f"{server_folder_name}/{client_file_name}"
 path_to_deamon_exe = f"{server_folder_name}/{deamon_file_name}"
 
@@ -168,7 +168,7 @@ def download_deamon():
     global app
     print("download deamon_received", os.getcwd() + "/" + path_to_deamon_exe)
     return send_from_directory(directory=os.getcwd() + "/" + server_folder_name, path=deamon_file_name,
-                               as_attachment=True, download_name="deamon_main.exe",mimetype='application/octet-stream')
+                               as_attachment=True, download_name="deamon_main.bin",mimetype='application/octet-stream')
 
 if __name__ == "__main__":
     run()

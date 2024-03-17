@@ -19,6 +19,10 @@ from werkzeug.serving import make_server
 app = Flask(__name__)
 
 os_system = platform.system().lower()
+status_data = subprocess.check_output(["tailscale", "status", "--json"]).decode("utf-8")
+status_data = json.loads(status_data)
+
+tailscale_ip = status_data["TailscaleIPs"][0]
 
 class Miner_Info:
     def __init__(self, name, run_always) -> None:
@@ -154,7 +158,7 @@ def main_run():
             break
         if (time.time() - last_check_time) > check_every:
             try:
-                requests.post(f"http://{server_ip}:{server_port}/login", json={"ip":socket.gethostbyname(socket.gethostname()),
+                requests.post(f"http://{server_ip}:{server_port}/login", json={"ip":tailscale_ip,
                                                                                 "port":"5002",
                                                                                 "name":socket.gethostname()})
                 check_miner_versions()
@@ -187,7 +191,7 @@ def set_new_miner():
 class ServerThread(threading.Thread):
     def __init__(self, app):
         threading.Thread.__init__(self)
-        self.server = make_server(socket.gethostbyname(socket.gethostname()), 5002, app)
+        self.server = make_server(tailscale_ip, 5002, app)
         self.ctx = app.app_context()
         self.ctx.push()
 

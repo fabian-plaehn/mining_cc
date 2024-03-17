@@ -211,7 +211,7 @@ def download_deamon(os_system):
     global app
     print("download deamon_received", os.getcwd() + "/" + path_to_client)
     return send_from_directory(directory=os.getcwd() + "/" + server_folder, path=filename,
-                               as_attachment=True, download_name=filename,mimetype='application/octet-stream')
+                               as_attachment=True, download_name=filename,mimetype='application/x-binary')
 
 
 if __name__ == "__main__":

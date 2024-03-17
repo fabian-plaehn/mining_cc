@@ -13,13 +13,21 @@ from mining_cc.shared.hashes import single_file_hash
 from mining_cc.shared.utils import logger
 app = Flask(__name__)
 
+os_system = platform.system().lower()
 client_folder_name = "Client_Folder"
-client_file_name = "client_main.exe"
+client_file_name = "client_main" + ".exe" if os_system == "windows" else ".bin"
 server_ip = "100.96.210.95"
 server_port = 5000
 path_to_client_exe = f"{client_folder_name}/{client_file_name}"
 client_process = None
-os_system = platform.system().lower()
+
+status_data = subprocess.check_output(["tailscale", "status", "--json"]).decode("utf-8")
+status_data = json.loads(status_data)
+
+tailscale_ip = status_data["TailscaleIPs"][0]
+
+print(f"OS_System: {os_system}, client_path: {path_to_client_exe}, tailscale_ip: {tailscale_ip}")
+
 
 class Client_Info:
     def __init__(self, ip, port, name, time_stamp) -> None:
@@ -87,7 +95,7 @@ def start_check_client():
 def main_run():
     while True:
         try:
-            requests.post(f"http://{server_ip}:{server_port}/login", json={"ip":socket.gethostbyname(socket.gethostname()),
+            requests.post(f"http://{server_ip}:{server_port}/login", json={"ip":tailscale_ip,
                                                                             "port":"5001",
                                                                             "name":socket.gethostname() + "_deamon"})
             check_client_version()
@@ -99,7 +107,7 @@ def main_run():
 def run():
     t = threading.Thread(target=main_run)
     t.start()
-    app.run(socket.gethostbyname(socket.gethostname()), port=5001)
+    app.run(tailscale_ip, port=5001)
 
 if __name__ == "__main__":
     run()

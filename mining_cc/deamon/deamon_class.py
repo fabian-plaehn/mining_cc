@@ -17,7 +17,6 @@ from mining_cc.shared.utils import kill_process_and_children, logger, payload_to
 import threading
 
 os_system = platform.system().lower()
-client_folder_name = "Client_Folder"
 if os_system == "windows":
     extension = ".exe"
 elif os_system == "linux":
@@ -27,7 +26,7 @@ else:
 client_file_name = "client_main" + extension
 server_ip = "100.96.210.95"
 server_port = 5000
-path_to_client_exe = f"{client_folder_name}/{client_file_name}"
+path_to_client_exe = f"{client_file_name}"
 client_process = None
 
 status_data = subprocess.check_output(["tailscale", "status", "--json"]).decode("utf-8")
@@ -107,11 +106,8 @@ class Deamon:
             self.client_socket.close()
         
     def check_client_version(self):
-        logger("checking client version")
-        if not os.path.isdir(client_folder_name):
-            os.mkdir(client_folder_name)
-                  
-        if not os.path.isfile(f"{client_folder_name}/{client_file_name}"):
+        logger("checking client version")      
+        if not os.path.isfile(path_to_client_exe):
             self.client_socket.send(request_new_client({"OS_System":os_system}))
             return
         else:

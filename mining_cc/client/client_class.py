@@ -80,7 +80,7 @@ class Miner_Info:
             logger(f"Start miner: {self.name}")
             try: self.process = subprocess.Popen(f"cd {self.name} &&  {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
             except PermissionError:
-                subprocess.Popen(f"chmod u+x {self.name}/{self.exe_name}")
+                os.popen(f"sudo chmod u+x {self.name}/{self.exe_name}")
                 self.start()
                 
     def stop(self):

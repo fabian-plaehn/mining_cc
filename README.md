@@ -7,3 +7,5 @@
 # pkg_ressources -> pip install setuptools
 
 # sudo -s get root
+
+# chmod 755 myscript

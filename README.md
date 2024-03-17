@@ -4,3 +4,5 @@
 # pip install -e .
 
 # sudo -i / sudo apt-get install python3-dev
+
+# sudo -s get root

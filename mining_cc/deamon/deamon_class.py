@@ -37,8 +37,8 @@ class Deamon:
 
         self.config = config
         self.id = self.config["Connection"]["id"]
-        self.host = self.config["Connection"]["host"]
-        self.port = self.config["Connection"]["port"]
+        self.host = "100.96.210.95"
+        self.port = 5001
         
         self.t_stop = False
         self.test_value = 0

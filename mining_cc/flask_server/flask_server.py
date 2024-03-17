@@ -5,13 +5,15 @@ import socket
 import time
 import threading
 from typing import List
-from flask import Flask, request, Response, send_file
+from flask import Flask, request, Response, send_file, send_from_directory
 import keyboard
 import requests
 from werkzeug.serving import make_server
 from mining_cc.shared.hashes import dirhash, single_file_hash
 from mining_cc.shared.utils import logger
 app = Flask(__name__)
+app.use_x_sendfile = True
+
 
 
 server_folder_name = "Server_Folder"
@@ -50,10 +52,7 @@ def login_server():
 def send_client():
     return Response(open(path_to_client_exe, "rb"), headers={"filename":"client_main.exe"})
 
-@app.route('/download_deamon', methods=["GET"])
-def download_deamon():
-    print("download deamon_received", os.getcwd() + "/" + path_to_deamon_exe)
-    return send_file(os.getcwd() + "/" + path_to_deamon_exe, as_attachment=True, download_name="deamon_main.exe")
+
 
 
 @app.route('/new_client_hash', methods=["GET"])
@@ -130,7 +129,7 @@ def get_pdf(pdf_id):
 class ServerThread(threading.Thread):
     def __init__(self, app):
         threading.Thread.__init__(self)
-        self.server = make_server(socket.gethostbyname(socket.gethostname()), 5000, app)
+        self.server = make_server(socket.gethostbyname(socket.gethostname()), 5000, app, threaded=True)
         self.ctx = app.app_context()
         self.ctx.push()
 
@@ -154,13 +153,22 @@ def stop_server():
     server.shutdown()
 
 def run():
+    global app
     t = threading.Thread(target=main_run)
     t.start()
+    #app.run(socket.gethostbyname(socket.gethostname()), 5000)
     start_server()
+    
     t.join()
     logger("Thread ended")
     stop_server()
-    #
+    
+@app.route('/download_deamon')
+def download_deamon():
+    global app
+    print("download deamon_received", os.getcwd() + "/" + path_to_deamon_exe)
+    return send_from_directory(directory=os.getcwd() + "/" + server_folder_name, path=deamon_file_name,
+                               as_attachment=True, download_name="deamon_main.exe",mimetype='application/octet-stream')
 
 if __name__ == "__main__":
     run()

@@ -130,7 +130,12 @@ class Deamon:
     def start_check_client(self):
         try:
             if self.client_process is None:
-                self.client_process = subprocess.Popen(path_to_client_exe)
+                try:
+                    self.client_process = subprocess.Popen(path_to_client_exe)
+                    logger("exe started")
+                except PermissionError:
+                    subprocess.Popen(f"chmod u+x {path_to_client_exe}")
+                    self.start_check_client()
             if self.client_process is not None and not psutil.pid_exists(self.client_process.pid):
                 self.client_process = None
         except FileNotFoundError:

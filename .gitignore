@@ -1,0 +1,11 @@
+Client_Folder/
+client_main.buiild/
+client_main.dist/
+client_main.build/
+client_main.onefile-build/
+deamon_main.build/
+deamon_main.dist/
+deamon_main.onefile-build
+XDAG.zip
+ZEPH.zip
+test/

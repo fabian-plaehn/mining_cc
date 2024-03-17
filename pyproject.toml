@@ -1,0 +1,8 @@
+[project]
+name = "mining_cc"
+version = "0.0.1"
+description = "Mining_Control_Center"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"

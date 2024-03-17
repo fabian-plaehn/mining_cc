@@ -1,0 +1,12 @@
+README.md
+pyproject.toml
+setup.cfg
+setup.py
+mining_cc/mining_cc.egg-info/PKG-INFO
+mining_cc/mining_cc.egg-info/SOURCES.txt
+mining_cc/mining_cc.egg-info/dependency_links.txt
+mining_cc/mining_cc.egg-info/not-zip-safe
+mining_cc/mining_cc.egg-info/top_level.txt
+mining_cc/shared/ProtoHeader.py
+mining_cc/shared/__init__.py
+mining_cc/shared/hashes.py

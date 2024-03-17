@@ -15,7 +15,13 @@ app = Flask(__name__)
 
 os_system = platform.system().lower()
 client_folder_name = "Client_Folder"
-client_file_name = "client_main" + ".exe" if os_system == "windows" else ".bin"
+if os_system == "windows":
+    extension = ".exe"
+elif os_system == "linux":
+    extension = ".bin"
+else:
+    raise Exception("not supported os")
+client_file_name = "client_main" + extension
 server_ip = "100.96.210.95"
 server_port = 5000
 path_to_client_exe = f"{client_folder_name}/{client_file_name}"

@@ -9,3 +9,5 @@ deamon_main.onefile-build
 XDAG.zip
 ZEPH.zip
 test/
+deamon_main.bin
+client_main.bin

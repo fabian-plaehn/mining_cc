@@ -6,6 +6,7 @@ import sys
 import time
 from datetime import datetime
 from hashlib import md5
+from typing import Literal
 
 from mining_cc.shared.utils import logger
 
@@ -19,8 +20,15 @@ from flask import Flask, request
 
 
 server_folder_name = "Server_Folder"
-client_file_name = "client_main.exe"
-path_to_client_exe = f"{server_folder_name}/windows/{client_file_name}"
+
+client_file_name = "client_main"
+deamon_file_name = "deamon_main"
+
+path_to_client_windows = server_folder_name + "/windows/" + client_file_name + ".exe"
+path_to_client_linux = server_folder_name + "/linux/" + client_file_name + ".bin"
+
+path_to_deamon_windows = server_folder_name + "/windows/" + deamon_file_name + ".exe"
+path_to_deamon_linux = server_folder_name + "/linux/" + deamon_file_name + ".bin"
 
 class Server:
     def __init__(self):
@@ -62,15 +70,19 @@ class Server:
             self.check_new_connection(server_socket_deamons)
             for conn, address, username in self.connection_list:
                 request_typ, payload = receive_proto_block(conn)
+                try:
+                    payload = json.loads(payload.decode().replace("'", '"'))
+                except (AttributeError, json.JSONDecodeError):
+                    pass
                 if request_typ == LoginRequest:
                     self.LoginRequest(conn, address, payload)
                 elif request_typ == ExitRequest:
                     self.ExitRequest(conn, address, username)
                 elif request_typ == Request_New_Client:
-                    self.Request_New_Client(conn)
+                    self.Request_New_Client(conn, payload)
                 elif request_typ == Request_Client_Hash:
                     logger("Request Client Hash")
-                    self.Request_Client_Hash(conn)
+                    self.Request_Client_Hash(conn, payload)
                 elif request_typ == Request_Miner_Hashes:
                     logger("Request Miner Hashes")
                     self.Request_Miner_Hashes(conn)
@@ -79,7 +91,6 @@ class Server:
                     self.Request_New_Folder(conn, payload.decode())
                 if username in self.config["Connections"]:
                     self.config["Connections"][username]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
-        self.closing()
 
     def closing(self):
         print("Closing.. Save Config")
@@ -99,14 +110,63 @@ class Server:
             
         conn.send(send_miner_hashes(hash_json))
         
-    def Request_Client_Hash(self, conn: socket.socket):
-        if not os.path.isfile(path_to_client_exe):
+    def Request_Client_Hash(self, conn: socket.socket, paylod):
+        os_system = paylod["OS_System"]
+        if os_system == "windows":
+            path_to_client = path_to_client_windows
+            filename = client_file_name + ".exe"
+        elif os_system == "linux":
+            path_to_client = path_to_client_linux
+            filename = client_file_name + ".bin"
+        else:
+            logger(f"OS_System not found: {os_system}")
+            return
+        
+        if not os.path.isfile(path_to_client):
             logger("client_main.exe not found")
-            return 0
-        hash = str(single_file_hash(path_to_client_exe))
+            return
+        
+        hash = str(single_file_hash(path_to_client))
         print(f"Client Hash: {hash}")
-        conn.send(send_client_hash(hash))
+        conn.send(send_client_hash({"filename":filename, "hash":hash}))
     
+    def Request_New_Client(self, conn: socket.socket, payload):
+        try:
+            os_system = payload["OS_System"]
+            if os_system == "windows":
+                path_to_client = path_to_client_windows
+                filename = client_file_name + ".exe"
+            elif os_system == "linux":
+                path_to_client = path_to_client_linux
+                filename = client_file_name + ".bin"
+            else:
+                logger(f"OS_System not found: {os_system}")
+                return
+
+            print("upload Client.exe")
+            conn.setblocking(True)
+                   
+            file_size = os.path.getsize(path_to_client)
+            print("File Size is :", file_size, "bytes")
+            #file_size_in_bytes = file_size.to_bytes(8, 'big')
+
+            print("Sending the file size")
+            conn.send(send_client_info({"filename": filename, "filesize":file_size}))
+            #msg_type, payload = receive_proto_block(conn)
+            #print(f"[SERVER]: {payload.decode()}")
+
+            print("Sending the file data")
+            with open(path_to_client, 'rb') as f1:
+                conn.send(send_client_data(f1.read()))
+            conn.send(send_client_finished())
+            conn.setblocking(False)
+        except AttributeError:
+            conn.close()
+        except (ConnectionResetError, ConnectionAbortedError):
+            print(f"Connection: {conn} Connection Reset while updating Client")
+            conn.setblocking(False)
+            return
+        
     def Request_New_Folder(self, conn, folder_name):
         try:
             logger(f"uploading folder: {folder_name}")
@@ -135,34 +195,6 @@ class Server:
             conn.setblocking(False)
             return
 
-    def Request_New_Client(self, conn: socket.socket):
-        try:
-            #shutil.make_archive("client", "zip", os.getcwd() + "/client_main")
-            print("upload Client.exe")
-            conn.setblocking(True)
-            #os.getcwd() + "/client_main.exe"
-            
-            file_size = os.path.getsize(path_to_client_exe)
-            print("File Size is :", file_size, "bytes")
-            #file_size_in_bytes = file_size.to_bytes(8, 'big')
-
-            print("Sending the file size")
-            conn.send(send_client_size(str(file_size)))
-            msg_type, payload = receive_proto_block(conn)
-            print(f"[SERVER]: {payload.decode()}")
-
-            print("Sending the file data")
-            with open(path_to_client_exe, 'rb') as f1:
-                conn.send(f1.read())
-            msg = conn.recv(1024).decode("utf-8")
-            print(f"[SERVER]: {msg}")
-            conn.setblocking(False)
-        except AttributeError:
-            conn.close()
-        except (ConnectionResetError, ConnectionAbortedError):
-            print(f"Connection: {conn} Connection Reset while updating Client")
-            conn.setblocking(False)
-            return
 
     def ExitRequest(self, conn, address, username):
         print("connection deleted")

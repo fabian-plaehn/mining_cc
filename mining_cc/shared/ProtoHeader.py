@@ -1,21 +1,25 @@
 import struct
 
 ProtoHeader = struct.Struct("!HI")
-Empty = 0
+Empty_Request = 0
 LoginRequest = 1
 ExitRequest = 2
+
 Request_New_Client = 3
-Send_New_Client = 4
-Request_Client_Hash = 5
-Send_Client_Hash = 6
-Send_Client_Info = 7
-Send_Client_Data = 13
-Send_Client_Finished = 14
-Request_Miner_Hashes = 8
-Send_Miner_Hashes = 9
-Request_New_Folder = 10
-Send_New_Folder = 11
-Activate_Miner = 12
+Request_Client_Hash = 4
+Send_Client_Hash = 5
+Send_Client_Info = 6
+Send_Client_Data = 7
+Send_Client_Finished = 8
+
+Request_New_Folder = 9
+Request_Miner_Hashes = 10
+Send_Miner_Hashes = 11
+Send_Folder_Info = 12
+Send_Folder_Data = 13
+Send_Folder_Finished = 14
+
+Activate_Miner = 15
 
 
 def receive_bytes(conn, count):
@@ -48,7 +52,7 @@ def receive_proto_block(conn):
         request_type, payload_length = ProtoHeader.unpack(proto_header)
         payload = receive_bytes(conn, payload_length)
     except BlockingIOError:
-        return Empty, None
+        return Empty_Request, None
     except (ConnectionResetError, ConnectionAbortedError, OSError):
         return ExitRequest, None
 
@@ -62,12 +66,12 @@ def format_login_request(username):
     proto_block = ProtoHeader.pack(LoginRequest, len(username_bytes)) + username_bytes
     return proto_block
 
-def request_new_client(data):
+def request_new_client(data):  # data {"OS_Version":OS_VERSION}
     data_b = str(data).encode()
     proto_block = ProtoHeader.pack(Request_New_Client, len(data_b)) + data_b
     return proto_block
 
-def request_client_hash(data):
+def request_client_hash(data): # data {"OS_Version":OS_VERSION}
     data_b = str(data).encode()
     proto_block = ProtoHeader.pack(Request_Client_Hash, len(data_b)) + data_b
     return proto_block
@@ -90,21 +94,34 @@ def send_client_finished():
     proto_block = ProtoHeader.pack(Send_Client_Finished, 0)
     return proto_block
 
-def request_miner_hashes():
-    proto_block = ProtoHeader.pack(Request_Miner_Hashes, 0)
+def request_new_folder(data):  # {"OS_Version", "folder_name"}
+    data_b = str(data).encode()
+    proto_block = ProtoHeader.pack(Request_New_Folder, len(data_b)) + data_b
     return proto_block
 
-def send_miner_hashes(data):
+def request_miner_hashes(data): # {"OS_Version":}
+    data_b = str(data).encode()
+    proto_block = ProtoHeader.pack(Request_Miner_Hashes, len(data_b)) + data_b
+    return proto_block
+
+def send_miner_hashes(data): 
     data_b = str(data).encode()
     proto_block = ProtoHeader.pack(Send_Miner_Hashes, len(data_b)) + data_b
     return proto_block
 
-def request_new_folder(folder_name):
-    data_b = str(folder_name).encode()
-    proto_block = ProtoHeader.pack(Request_New_Folder, len(data_b)) + data_b
+def send_folder_info(data):
+    data_b = str(data).encode()
+    proto_block = ProtoHeader.pack(Send_Folder_Info, len(data_b)) + data_b
     return proto_block
 
-def send_new_folder(data):
-    data_b = str(data).encode()
-    proto_block = ProtoHeader.pack(Send_New_Folder, len(data_b)) + data_b
+def send_folder_data(data):
+    proto_block = ProtoHeader.pack(Send_Folder_Data, len(data)) + data
+    return proto_block
+
+def send_folder_finished():
+    proto_block = ProtoHeader.pack(Send_Folder_Finished, 0)
+    return proto_block
+
+def send_pickle_data(Header, data):
+    proto_block = ProtoHeader.pack(Header, len(data)) + data
     return proto_block

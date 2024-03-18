@@ -53,6 +53,11 @@ class Server:
         self.connection_list = []
         self.id_dictionary = {}
         
+    def show_connected_ids(self):
+        connected_ids = [username for conn, address, username in self.connection_list]
+        print(connected_ids)
+            
+        
     def run(self):
         # get the hostname
         host = socket.gethostbyname(socket.gethostname())
@@ -100,7 +105,7 @@ class Server:
                     self.config["Connections"][username]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 
             if (time.time() - last_check_time) > check_every:
-                    print(self.id_dictionary)
+                    self.show_connected_ids()
                     last_check_time = time.time()
                     
             while True:

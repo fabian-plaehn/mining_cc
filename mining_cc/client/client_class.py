@@ -158,7 +158,7 @@ class Client:
         self.host = server_ip
         self.port = server_port
         
-        if config["Current_Miner"] is not None:
+        if "Curret_Miner" in self.config and self.config["Current_Miner"] is not None:
             self.activate_miner(config["Current_Miner"])
         
     def check_miner_versions(self, server_json: dict):

@@ -62,9 +62,11 @@ class Miner_Info:
             miner_config["cpu"]["enabled"] = True
         except:
             pass
-            
+        
+        print(miner_config, e_json)
         if e_json is not None:
             miner_config = merge(miner_config, e_json)
+        print(miner_config)
 
         with open(f"{self.name}/{self.config_name}", "w") as f:
             json.dump(miner_config, f)
@@ -270,6 +272,8 @@ class Client:
         global miner_info_dict
         if os_system == "linux":
             for path, subdirs, files in os.walk("./"):
+                if name.endswith(".json"):
+                    continue
                 for name in files:
                     subprocess.check_call(['chmod', '+x', os.path.join(path, name)])
         for key, miner in miner_info_dict.items():

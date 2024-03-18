@@ -159,7 +159,7 @@ class Client:
         self.port = server_port
         
         if "Current_Miner" in self.config and self.config["Current_Miner"] is not None:
-            self.activate_miner({["miner_name"]:config["Current_Miner"], "config":{}})
+            self.activate_miner({"miner_name":config["Current_Miner"], "config":{}})
         
     def check_miner_versions(self, server_json: dict):
         hash_json = {}

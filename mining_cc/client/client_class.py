@@ -83,7 +83,7 @@ class Miner_Info:
                     process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
                     self.pid = process.pid
                 elif os_system == "linux":
-                    process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    process = subprocess.Popen(f"{self.name}/{self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
                     self.pid = process.pid
                 print("process started")
             except PermissionError:
@@ -111,6 +111,7 @@ class Miner_Info:
             miner_config["cpu"]["enabled"] = False
             with open(f"{self.name}/config.json", "w") as f:
                 json.dump(miner_config, f)
+                
     def kill(self):
         try:
             logger(f"Kill Miner: {self.name}, {self.pid}")
@@ -207,6 +208,7 @@ class Client:
         if os_system == "linux":
             for file in os.listdir(folder_name):
                 if os.path.isfile(folder_name + "/" + file):
+                    subprocess.check_call(['chmod', '+x', folder_name+"/"+file])
                     os.popen(f"sudo chmod u+x {folder_name}/{file}")
         miner_info_dict[folder_name].currently_updating = False
         self.client_socket.setblocking(False)
@@ -215,8 +217,11 @@ class Client:
         global miner_info_dict
         self.start_check_miner()
         self.client_socket = connect_to_server(self.host, self.port)
-        check_every = 120
-        last_check_time = time.time() - check_every
+        check_every = 10
+        last_check_time = time.time() - 10
+        
+        req_hashes_every = 120
+        last_req_hashes_time = time.time() - req_hashes_every
         try:
             while True:
                 if keyboard.is_pressed('q'):
@@ -237,9 +242,12 @@ class Client:
                     self.activate_miner(payload)
                 if (time.time() - last_check_time) > check_every:
                     logger("Requesting Miner Hashes")
-                    self.client_socket.send(request_miner_hashes({"OS_System":os_system}))
                     self.start_check_miner()
                     last_check_time = time.time()
+                if (time.time() - last_req_hashes_time) > req_hashes_every:
+                    logger("Requesting Miner Hashes")
+                    self.client_socket.send(request_miner_hashes({"OS_System":os_system}))
+                    last_req_hashes_time = time.time()
                 
         except (ConnectionResetError, ConnectionAbortedError):
             self.run()
@@ -280,3 +288,7 @@ class Client:
 
 if __name__ == "__main__":
     pass
+
+#wget -O qli-Service-install.sh https://dl.qubic.li/cloud-init/qli-Service-install.sh
+#chmod u+x qli-Service-install.sh
+#./qli-Service-install.sh 16 eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjY0ZTdmNzIyLTA1ZDgtNDNlYy05YTU0LTBlNTljMGUzMGRjOSIsIk1pbmluZyI6IiIsIm5iZiI6MTcxMDc1Njk1OSwiZXhwIjoxNzQyMjkyOTU5LCJpYXQiOjE3MTA3NTY5NTksImlzcyI6Imh0dHBzOi8vcXViaWMubGkvIiwiYXVkIjoiaHR0cHM6Ly9xdWJpYy5saS8ifQ.WQut3zCgcVGNDgxSGveI32m_p8WH9WC1i9iETRrkYrkw4HLBJAgaK6feqOHPDBqoxcjVWbS39Unr8zPXAJfAxg

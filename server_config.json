@@ -16,20 +16,28 @@
     },
     "rig12FD7E_deamon": {
       "Sheet": "XMR",
-      "Last_seen": "2024/03/18 05:38:17"
+      "Last_seen": "2024/03/18 06:00:32"
     },
     "rig12FD7E": {
       "Sheet": "XMR",
-      "Last_seen": "2024/03/18 05:38:17"
+      "Last_seen": "2024/03/18 06:00:32"
     },
     "DESKTOP-LIJOB68_deamon": {
       "Sheet": "XMR"
     },
     "rig0040DF_deamon": {
       "Sheet": "XMR",
-      "Last_seen": "2024/03/18 05:38:17"
+      "Last_seen": "2024/03/18 06:00:32"
     },
     "rig0040DF": {
+      "Sheet": "XMR",
+      "Last_seen": "2024/03/18 06:00:32"
+    },
+    "rig039E17_deamon": {
+      "Sheet": "XMR",
+      "Last_seen": "2024/03/18 06:00:32"
+    },
+    "rig039E17": {
       "Sheet": "XMR"
     }
   }

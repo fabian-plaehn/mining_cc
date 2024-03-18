@@ -103,7 +103,8 @@ class Deamon:
             logger(f"[RECV] File data received.")
             logger(f"Granting access rights")
             if os_system == "linux":
-                os.popen(f"sudo chmod u+x {path_to_client_exe}")
+                subprocess.check_call(['chmod', '+x', path_to_client_exe])
+                #os.popen(f"sudo chmod u+x {path_to_client_exe}")
             self.client_socket.setblocking(False)
         except UnicodeDecodeError:
             self.client_socket.close()
@@ -131,10 +132,13 @@ class Deamon:
                     self.start_check_client()
             else:
                 pid_list = get_process_id_and_childen(self.client_process.pid)
+                print("pid_list client_process: ", pid_list)
                 if pid_list is None or len(get_process_id_and_childen(self.client_process.pid)) < 2:
+                    print("kill it")
                     kill_process_and_children(self.client_process.pid)
                     self.client_process = None
                 else:
+                    print("dont kill it")
                     self.client_pid = get_process_id_and_childen(self.client_process.pid)[0]
             if self.client_process is not None and not psutil.pid_exists(self.client_process.pid):
                 self.client_process = None
@@ -144,8 +148,11 @@ class Deamon:
     def run(self):
         self.start_check_client()
         self.client_socket = connect_to_server(self.host, self.port)
-        check_every = 120
-        last_check_time = time.time() - check_every
+        check_every = 10
+        last_check_time = time.time() - 10
+        
+        req_hashes_every = 120
+        last_req_hashes_time = time.time() - req_hashes_every
         try:
             while True:
                 if keyboard.is_pressed('q'):
@@ -171,9 +178,12 @@ class Deamon:
                         self.client_socket.send(request_new_client({"OS_System":os_system}))
                 
                 if (time.time() - last_check_time) > check_every:
-                    self.check_client_version()
                     self.start_check_client()
                     last_check_time = time.time()
+                    
+                if (time.time() - last_req_hashes_time) > req_hashes_every:
+                    self.check_client_version()
+                    last_req_hashes_time = time.time()
                 
         except ConnectionResetError:
             self.run()

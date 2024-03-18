@@ -188,7 +188,7 @@ class Client:
         
         for file in os.listdir(folder_name):
             if os.path.isfile(folder_name + "/" + file):
-                os.popen(f"sudo chmod u+x {folder_name + "/" + file}")
+                os.popen(f"sudo chmod u+x {folder_name}/{file}")
         
         self.client_socket.setblocking(False)
 

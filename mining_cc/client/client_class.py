@@ -63,8 +63,7 @@ class Miner_Info:
             
         if e_json is not None:
             miner_config = merge(miner_config, e_json)
-            
-        print("dump config")
+
         with open(f"{self.name}/{self.config_name}", "w") as f:
             json.dump(miner_config, f)
             
@@ -224,9 +223,7 @@ class Client:
         last_req_hashes_time = time.time() - req_hashes_every
         try:
             while True:
-                if keyboard.is_pressed('q'):
-                    raise KeyboardInterrupt
-        
+                time.sleep(0.5)
                 request_typ, payload = receive_proto_block(self.client_socket)
                 payload = payload_to_dict(payload)
                 if request_typ == ExitRequest:
@@ -264,9 +261,10 @@ class Client:
             
     def start_check_miner(self):
         global miner_info_dict
-        for path, subdirs, files in os.walk("./"):
-            for name in files:
-                subprocess.check_call(['chmod', '+x', os.path.join(path, name)])
+        if os_system == "linux":
+            for path, subdirs, files in os.walk("./"):
+                for name in files:
+                    subprocess.check_call(['chmod', '+x', os.path.join(path, name)])
         for key, miner in miner_info_dict.items():
             if miner.run_always or miner.active:
                 miner.start()

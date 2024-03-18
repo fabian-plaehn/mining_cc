@@ -51,7 +51,7 @@ def merge(a: dict, b: dict, path=[]):
             if isinstance(a[key], list) and isinstance(b[key], list):
                 for i, element in enumerate(a[key]):
                     if isinstance(element, dict) and isinstance(b[key][i], dict):
-                        a[key][i] = merge(element, b[key][i])
+                        a[key][i] = merge(b[key][i], element)
                         
             elif a[key] != b[key]:
                 a[key] = b[key]

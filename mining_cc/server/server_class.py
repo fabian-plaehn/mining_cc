@@ -99,6 +99,10 @@ class Server:
                 if username in self.config["Connections"]:
                     self.config["Connections"][username]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 
+            if (time.time() - last_check_time) > check_every:
+                    print(self.id_dictionary)
+                    last_check_time = time.time()
+                    
             while True:
                 try: miner_id, data = queue.get_nowait()
                 except Empty: break
@@ -323,6 +327,23 @@ def download_deamon_service(os_system):
     else:
         return Response(400)
     print("download deamon_service_received", os.getcwd() + "/" + path_to_client)
+    #shutil.make_archive(os.getcwd() + "/" + server_folder + "/" + filename, "zip", os.getcwd() + "/" + server_folder + "/" + filename)
+    return send_from_directory(directory=os.getcwd() + "/" + server_folder, path=filename,
+                               as_attachment=True, download_name=filename,mimetype='application/x-binary')
+    
+@app.route('/<os_system>/shell_script')
+def download_shell_script(os_system):
+    if os_system == "windows":
+        path_to_client = path_to_deamon_windows
+        filename = deamon_file_name + ".exe"
+        server_folder = server_folder_name + "/windows"
+    elif os_system == "linux":
+        path_to_client = path_to_deamon_linux
+        filename = "daemon_shell_script.sh"
+        server_folder = server_folder_name + "/linux"
+    else:
+        return Response(400)
+    print("download deamon_shell_script_received", os.getcwd() + "/" + path_to_client)
     #shutil.make_archive(os.getcwd() + "/" + server_folder + "/" + filename, "zip", os.getcwd() + "/" + server_folder + "/" + filename)
     return send_from_directory(directory=os.getcwd() + "/" + server_folder, path=filename,
                                as_attachment=True, download_name=filename,mimetype='application/x-binary')

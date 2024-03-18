@@ -143,6 +143,7 @@ class Client:
         except FileNotFoundError:
             print("config not found. Creating one")
             config = {}
+            config["Current_Miner"] = None
         config["Connection"] = {}
         config["Connection"]["id"] = socket.gethostname()
         config["Connection"]["host"] = tailscale_ip
@@ -156,6 +157,9 @@ class Client:
         self.id = self.config["Connection"]["id"]
         self.host = server_ip
         self.port = server_port
+        
+        if config["Current_Miner"] is not None:
+            self.activate_miner(config["Current_Miner"])
         
     def check_miner_versions(self, server_json: dict):
         hash_json = {}
@@ -243,6 +247,7 @@ class Client:
                     self.new_folder(payload)
                 elif request_typ == Activate_Miner:
                     logger("Activate_Miner")
+                    payload = pickle.loads(payload)
                     self.activate_miner(payload)
                 if (time.time() - last_check_time) > check_every:
                     logger("Requesting Miner Hashes")
@@ -252,7 +257,8 @@ class Client:
                     logger("Requesting Miner Hashes")
                     self.client_socket.send(request_miner_hashes({"OS_System":os_system}))
                     last_req_hashes_time = time.time()
-                
+                    with open("client_config.json", "w") as f:
+                        f.write(json.dumps(self.config, indent=2))
         except (ConnectionResetError, ConnectionAbortedError):
             self.run()
         except KeyboardInterrupt:
@@ -278,13 +284,15 @@ class Client:
             if miner.run_always or miner.active:
                 miner.start()
                 
+    # TODO safe last activated miner and load when booting
     def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}
         global current_Miner
         global miner_info_dict
-        payload = pickle.loads(payload)
+        
         miner_name = payload["miner_name"]
         config = payload["config"]
         logger(f"set new miner: {miner_name}")  
+        self.config["Current_Miner"] = miner_name
         if current_Miner is not None and current_Miner.name != miner_name:
             current_Miner.stop()
             if current_Miner.run_always: current_Miner.restart()

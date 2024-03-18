@@ -74,10 +74,8 @@ class Deamon:
             logger("updating client")
             
             if self.client_process is not None:
-                logger("Shutting down client process")
+                logger(f"Shutting down client process: {self.client_process.pid}")
                 kill_process_and_children(self.client_process.pid)
-                while psutil.pid_exists(self.client_process.pid):
-                    pass
                 self.client_process = None
             SIZE = 1024
             BYTEORDER_LENGTH = 8

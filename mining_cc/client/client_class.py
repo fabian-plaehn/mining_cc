@@ -58,8 +58,10 @@ class Miner_Info:
         with open(f"{self.name}/{self.config_name}", "rb") as f:
             miner_config = json.load(f)
         
-        if self.run_always:
+        try:
             miner_config["cpu"]["enabled"] = True
+        except:
+            pass
             
         if e_json is not None:
             miner_config = merge(miner_config, e_json)
@@ -107,9 +109,12 @@ class Miner_Info:
                     miner_config = json.load(f)
             except FileNotFoundError:
                 return
-            miner_config["cpu"]["enabled"] = False
-            with open(f"{self.name}/config.json", "w") as f:
-                json.dump(miner_config, f)
+            try:
+                miner_config["cpu"]["enabled"] = False
+                with open(f"{self.name}/config.json", "w") as f:
+                    json.dump(miner_config, f)
+            except:
+                pass
                 
     def kill(self):
         try:

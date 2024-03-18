@@ -144,7 +144,7 @@ class Deamon:
     def run(self):
         self.start_check_client()
         self.client_socket = connect_to_server(self.host, self.port)
-        check_every = 10
+        check_every = 120
         last_check_time = time.time() - check_every
         try:
             while True:

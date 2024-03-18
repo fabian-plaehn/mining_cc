@@ -1,0 +1,20 @@
+[Unit]
+Description=mining_cc_daemon
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/home/user/project
+ExecStart=/home/user/project/daemon_main
+ExecReload=/bin/kill -HUP $MAINPID
+Restart=always
+StandardOutput=syslog
+StandardError=syslog
+SyslogIdentifier=mining_cc_daemon
+User=root
+Group=root
+Environment=PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/bin:/home/user/project
+
+
+[Install]
+WantedBy=multi-user.target

@@ -213,10 +213,10 @@ class Client:
 
     def run(self):
         global miner_info_dict
-        check_every = 10
-        last_check_time = time.time() - check_every
         self.start_check_miner()
         self.client_socket = connect_to_server(self.host, self.port)
+        check_every = 120
+        last_check_time = time.time() - check_every
         try:
             while True:
                 if keyboard.is_pressed('q'):

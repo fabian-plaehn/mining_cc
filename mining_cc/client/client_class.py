@@ -117,8 +117,6 @@ class Miner_Info:
             if self.pid is None:
                 return
             kill_process_and_children(self.pid)
-            while psutil.pid_exists(self.pid):
-                pass
             self.pid = None
         except AttributeError:
             return

@@ -17,9 +17,10 @@ def payload_to_dict(payload):
 
 def get_process_id_and_childen(pid: int, sig: int = 15):
     proc_id_list = []
-    proc_id_list.append(proc.pid)
+    
     try:
         proc = psutil.Process(pid)
+        proc_id_list.append(proc.pid)
     except psutil.NoSuchProcess as e:
         # Maybe log something here
         return

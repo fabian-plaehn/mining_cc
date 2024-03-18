@@ -12,9 +12,9 @@ import json
 import keyboard
 import psutil
 
-from mining_cc.shared.hashes import dirhash
+from mining_cc.shared.hashes import dirhash, single_file_hash
 
-from mining_cc.shared.utils import kill_process_and_children, logger, merge, payload_to_dict
+from mining_cc.shared.utils import get_process_id_and_childen, kill_process_and_children, logger, merge, payload_to_dict
 from mining_cc.shared.ProtoHeader import *
 from mining_cc.shared.connection import *
 
@@ -40,13 +40,14 @@ tailscale_ip = status_data["TailscaleIPs"][0]
 
 
 class Miner_Info:
-    def __init__(self, name, run_always, exe_name) -> None:
+    def __init__(self, name, run_always, exe_name, config_name) -> None:
         self.name = name
         self.exe_name = exe_name
         self.run_always = run_always
-        self.process = None
+        self.pid = None
         self.active = False
         self.currently_updating = False
+        self.config_name = config_name
         
     def activate(self, e_json=None):
         if self.active:
@@ -54,18 +55,17 @@ class Miner_Info:
             pass
         
         logger(f"Activate miner: {self.name}")
-        try:
-            with open(f"{self.name}/config.json", "r") as f:
-                miner_config = json.load(f)
-        except FileNotFoundError:
-            return 
+        with open(f"{self.name}/{self.config_name}", "rb") as f:
+            miner_config = json.load(f)
         
         if self.run_always:
             miner_config["cpu"]["enabled"] = True
             
         if e_json is not None:
             miner_config = merge(miner_config, e_json)
-        with open(f"{self.name}/config.json", "w") as f:
+            
+        print("dump config")
+        with open(f"{self.name}/{self.config_name}", "w") as f:
             json.dump(miner_config, f)
             
         self.active = True 
@@ -76,13 +76,26 @@ class Miner_Info:
         self.start()
         
     def start(self):
-        if self.process is None:
+        if self.pid is None:
             logger(f"Start miner: {self.name}")
             try: 
-                self.process = subprocess.Popen(f"cd {self.name} &&  {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                if os_system == "windows":
+                    process = subprocess.Popen(f"cd {self.name} && {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    self.pid = process.pid
+                elif os_system == "linux":
+                    process = subprocess.Popen(f"{self.name}/{self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    self.pid = process.pid
                 print("process started")
             except PermissionError:
-                os.popen(f"sudo chmod u+x {self.name}/{self.exe_name}")
+                if os_system == "linux":
+                    os.popen(f"sudo chmod u+x {self.name}/{self.exe_name}")
+                    self.start()
+        else:
+            pid_list = get_process_id_and_childen(self.pid)
+            print(pid_list)
+            if pid_list is None or len(pid_list) < 2:
+                kill_process_and_children(self.pid)
+                self.pid = None
                 self.start()
                 
     def stop(self):
@@ -100,19 +113,20 @@ class Miner_Info:
                 json.dump(miner_config, f)
     def kill(self):
         try:
-            logger(f"Kill Miner: {self.name}, {self.process.pid}")
-            if self.process is None:
+            logger(f"Kill Miner: {self.name}, {self.pid}")
+            if self.pid is None:
                 return
-            kill_process_and_children(self.process.pid)
-            while psutil.pid_exists(self.process.pid):
+            kill_process_and_children(self.pid)
+            while psutil.pid_exists(self.pid):
                 pass
-            self.process = None
+            self.pid = None
         except AttributeError:
             return
         
         
-miner_info_dict = {"ZEPH":Miner_Info("ZEPH", True, "xmrigDaemon"),
-                   "XDAG":Miner_Info("XDAG", True, "xmrigDaemon")}
+miner_info_dict = {"ZEPH":Miner_Info("ZEPH", True, "xmrigDaemon", "config.json"),
+                   "XDAG":Miner_Info("XDAG", True, "xmrigDaemon", "config.json"),
+                   "QUBIC":Miner_Info("QUBIC", False, "qli-Client", "appsettings.json")}
 
 current_Miner: Miner_Info = None
 
@@ -145,7 +159,7 @@ class Client:
             if not os.path.isdir(file_path):
                 continue
             # is dir
-            hash_d = dirhash(file_path, excluded_files=["config.json"])
+            hash_d = single_file_hash(file_path + ".zip")
             hash_json[file] = hash_d
         for key, _ in server_json.items():
             if key not in hash_json:
@@ -180,16 +194,23 @@ class Client:
 
         logger(f"[RECV] File data received.")
         if os.path.isdir(folder_name):
+            miner_info_dict[folder_name].currently_updating = True
+            if miner_info_dict[folder_name].pid is not None:
+                print(get_process_id_and_childen(miner_info_dict[folder_name].pid))
+                kill_process_and_children(miner_info_dict[folder_name].pid)
+                # new version
+            time.sleep(0.1)
             shutil.rmtree(f"{folder_name}")
         try:
             shutil.unpack_archive(f"{folder_name}.zip", f"{folder_name}")
         except PermissionError:
             logger("Miner not closed")
         
-        for file in os.listdir(folder_name):
-            if os.path.isfile(folder_name + "/" + file):
-                os.popen(f"sudo chmod u+x {folder_name}/{file}")
-        
+        if os_system == "linux":
+            for file in os.listdir(folder_name):
+                if os.path.isfile(folder_name + "/" + file):
+                    os.popen(f"sudo chmod u+x {folder_name}/{file}")
+        miner_info_dict[folder_name].currently_updating = False
         self.client_socket.setblocking(False)
 
     def run(self):
@@ -252,12 +273,12 @@ class Client:
             current_Miner.stop()
             if current_Miner.run_always: current_Miner.restart()
             current_Miner = miner_info_dict[miner_name]
-            current_Miner.activate(config)
+            miner_info_dict[miner_name].activate(config)
         elif current_Miner is None:
             for name, miner in miner_info_dict.items():
                 miner.stop()
             current_Miner = miner_info_dict[miner_name]
-            current_Miner.activate(config)
+            miner_info_dict[miner_name].activate(config)
 
 if __name__ == "__main__":
     pass

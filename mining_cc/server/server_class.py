@@ -190,7 +190,7 @@ class Server:
             if not os.path.isdir(file_path):
                 continue
             # is dir
-            hash_d = dirhash(file_path, excluded_files=["config.json"])
+            hash_d = single_file_hash(file_path + ".zip")
             hash_json[file] = hash_d
         print(hash_json)
             

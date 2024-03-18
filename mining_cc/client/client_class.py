@@ -272,6 +272,8 @@ class Client:
         global miner_info_dict
         if os_system == "linux":
             for path, subdirs, files in os.walk("./"):
+                if name.endswith(".json"):
+                    continue
                 for name in files:
                     subprocess.check_call(['chmod', '+x', os.path.join(path, name)])
         for key, miner in miner_info_dict.items():

@@ -62,11 +62,8 @@ class Miner_Info:
             miner_config["cpu"]["enabled"] = True
         except:
             pass
-        
-        print(miner_config, e_json)
         if e_json is not None:
             miner_config = merge(miner_config, e_json)
-        print(miner_config)
 
         with open(f"{self.name}/{self.config_name}", "w") as f:
             json.dump(miner_config, f)
@@ -232,7 +229,7 @@ class Client:
         last_req_hashes_time = time.time() - req_hashes_every
         try:
             while True:
-                time.sleep(0.5)
+                time.sleep(1)
                 request_typ, payload = receive_proto_block(self.client_socket)
                 payload = payload_to_dict(payload)
                 if request_typ == ExitRequest:

@@ -16,13 +16,20 @@
     },
     "rig12FD7E_deamon": {
       "Sheet": "XMR",
-      "Last_seen": "2024/03/18 01:25:43"
+      "Last_seen": "2024/03/18 05:38:17"
     },
     "rig12FD7E": {
       "Sheet": "XMR",
-      "Last_seen": "2024/03/18 01:25:43"
+      "Last_seen": "2024/03/18 05:38:17"
     },
     "DESKTOP-LIJOB68_deamon": {
+      "Sheet": "XMR"
+    },
+    "rig0040DF_deamon": {
+      "Sheet": "XMR",
+      "Last_seen": "2024/03/18 05:38:17"
+    },
+    "rig0040DF": {
       "Sheet": "XMR"
     }
   }

@@ -80,10 +80,10 @@ class Miner_Info:
             logger(f"Start miner: {self.name}")
             try: 
                 if os_system == "windows":
-                    process = subprocess.Popen(f"cd {self.name} && {self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
                     self.pid = process.pid
                 elif os_system == "linux":
-                    process = subprocess.Popen(f"{self.name}/{self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
                     self.pid = process.pid
                 print("process started")
             except PermissionError:

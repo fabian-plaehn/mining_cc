@@ -209,7 +209,7 @@ class Client:
             for file in os.listdir(folder_name):
                 if os.path.isfile(folder_name + "/" + file):
                     subprocess.check_call(['chmod', '+x', folder_name+"/"+file])
-                    os.popen(f"sudo chmod u+x {folder_name}/{file}")
+                    #os.popen(f"sudo chmod u+x {folder_name}/{file}")
         miner_info_dict[folder_name].currently_updating = False
         self.client_socket.setblocking(False)
 
@@ -264,6 +264,9 @@ class Client:
             
     def start_check_miner(self):
         global miner_info_dict
+        for path, subdirs, files in os.walk("./"):
+            for name in files:
+                subprocess.check_call(['chmod', '+x', os.path.join(path, name)])
         for key, miner in miner_info_dict.items():
             if miner.run_always or miner.active:
                 miner.start()

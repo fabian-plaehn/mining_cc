@@ -101,6 +101,8 @@ class Deamon:
                 f.write(packet)
 
             logger(f"[RECV] File data received.")
+            logger(f"Granting access rights")
+            os.popen(f"sudo chmod u+x {path_to_client_exe}")
             self.client_socket.setblocking(False)
         except UnicodeDecodeError:
             self.client_socket.close()

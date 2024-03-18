@@ -8,6 +8,7 @@ import sys
 import time
 from typing import Literal
 
+import keyboard
 import psutil
 
 from mining_cc.shared.connection import connect_to_server
@@ -139,6 +140,8 @@ class Deamon:
         last_check_time = time.time() - check_every
         try:
             while True:
+                if keyboard.is_pressed('q'):
+                    raise KeyboardInterrupt
                 request_typ, payload = receive_proto_block(self.client_socket)
                 payload = payload_to_dict(payload)
                 if request_typ == ExitRequest:
@@ -173,7 +176,8 @@ class Deamon:
             with open("client_config.json", "w") as f:
                 f.write(json.dumps(self.config, indent=2))
             logger("Exiting")
-            self.client_process.kill()
-            self.client_process.wait()
+            if self.client_process is not None:
+                kill_process_and_children(self.client_process.pid)
+
             sys.exit(0)
             

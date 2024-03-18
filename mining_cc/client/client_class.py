@@ -122,8 +122,10 @@ class Miner_Info:
             return
         
         
-miner_info_dict = {"ZEPH":Miner_Info("ZEPH", True, "xmrigDaemon", "config.json"),
-                   "XDAG":Miner_Info("XDAG", True, "xmrigDaemon", "config.json"),
+miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"),
+                   "XDAG":Miner_Info("XDAG", False, "xmrigDaemon", "config.json"),
+                   "RTC":Miner_Info("RTC", False, "xmrigDaemon", "config.json"),
+                   "YDA":Miner_Info("YDA", False, "xmrigDaemon", "config.json"),
                    "QUBIC":Miner_Info("QUBIC", False, "qli-Client", "appsettings.json")}
 
 current_Miner: Miner_Info = None

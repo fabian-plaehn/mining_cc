@@ -56,7 +56,7 @@
         "cn/0": false
     },
     "log-file": null,
-    "donate-level": 5,
+    "donate-level": 1,
     "donate-over-proxy": 0,
     "pools": [
         {

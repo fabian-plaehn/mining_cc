@@ -25,14 +25,20 @@ elif os_system == "linux":
 else:
     raise Exception("not supported os")
 client_file_name = "client_main" + extension
-server_ip = "100.96.210.95"
-server_port = 5000
+
 path_to_client_exe = f"{client_file_name}"
 client_process = None
 
 status_data = subprocess.check_output(["tailscale", "status", "--json"]).decode("utf-8")
 status_data = json.loads(status_data)
 
+for node_key, data_dict in status_data["Peer"].items():
+    if "mining-cc-server" in data_dict["DNSName"]:
+        print("Server_found", data_dict["HostName"], data_dict["DNSName"], data_dict["TailscaleIPs"])
+        server_ip = data_dict["TailscaleIPs"][0]
+        server_port = 5000
+        break
+    
 tailscale_ip = status_data["TailscaleIPs"][0]
 
 print(f"OS_System: {os_system}, client_path: {path_to_client_exe}, tailscale_ip: {tailscale_ip}")
@@ -74,7 +80,7 @@ class Deamon:
             logger("updating client")
             
             if self.client_process is not None:
-                logger(f"Shutting down client process: {self.client_process.pid}")
+                logger(f"{self.id}: Shutting down client process: {self.client_process.pid}")
                 kill_process_and_children(self.client_process.pid) 
                 time.sleep(0.1)
                 self.client_process = None
@@ -86,10 +92,10 @@ class Deamon:
             filename = paylod["file_name"]
             filesize = paylod["file_size"]
             file_size = int(filesize)
-            logger(f"File size received: {file_size} bytes")
-            logger(f"File name received: {filename} bytes")
+            logger(f"{self.id}: File size received: {file_size} bytes")
+            logger(f"{self.id}: File name received: {filename} bytes")
 
-            logger(f"[RECV] Receiving the file data.")
+            logger(f"{self.id}: [RECV] Receiving the file data.")
             # Until we've received the expected amount of data, keep receiving
             packet = b""  # Use bytes, not str, to accumulate
             while True:
@@ -100,8 +106,8 @@ class Deamon:
             with open(path_to_client_exe, 'wb') as f:
                 f.write(packet)
 
-            logger(f"[RECV] File data received.")
-            logger(f"Granting access rights")
+            logger(f"{self.id}: [RECV] File data received.")
+            logger(f"{self.id}: Granting access rights")
             if os_system == "linux":
                 subprocess.check_call(['chmod', '+x', path_to_client_exe])
                 #os.popen(f"sudo chmod u+x {path_to_client_exe}")
@@ -122,23 +128,23 @@ class Deamon:
         try:
             if self.client_process is None:
                 try:
-                    logger("starting process?")
+                    logger("{self.id}: starting process?")
                     self.client_process = subprocess.Popen(path_to_client_exe)
                     print(self.client_process, self.client_process.pid)
-                    logger("exe started")
+                    logger("{self.id}: exe started")
                 except PermissionError:
                     if os_system == "linux":
                         os.popen(f"sudo chmod u+x {path_to_client_exe}")
                     self.start_check_client()
             else:
                 pid_list = get_process_id_and_childen(self.client_process.pid)
-                print("pid_list client_process: ", pid_list)
+                print("{self.id}: pid_list client_process: ", pid_list)
                 if pid_list is None or len(get_process_id_and_childen(self.client_process.pid)) < 2:
-                    print("kill it")
+                    print(f"{self.id}: kill it")
                     kill_process_and_children(self.client_process.pid)
                     self.client_process = None
                 else:
-                    print("dont kill it")
+                    print(f"{self.id}: dont kill it")
                     self.client_pid = get_process_id_and_childen(self.client_process.pid)[0]
             if self.client_process is not None and not psutil.pid_exists(self.client_process.pid):
                 self.client_process = None
@@ -146,34 +152,34 @@ class Deamon:
             pass
         
     def run(self):
-        self.start_check_client()
-        self.client_socket = connect_to_server(self.host, self.port)
-        check_every = 10
-        last_check_time = time.time() - 10
-        
-        req_hashes_every = 120
-        last_req_hashes_time = time.time() - req_hashes_every
         try:
+            self.start_check_client()
+            self.client_socket = connect_to_server(self.host, self.port)
+            check_every = 10
+            last_check_time = time.time() - 10
+            
+            req_hashes_every = 120
+            last_req_hashes_time = time.time() - req_hashes_every
             while True:
                 if keyboard.is_pressed('q'):
                     raise KeyboardInterrupt
                 request_typ, payload = receive_proto_block(self.client_socket)
                 payload = payload_to_dict(payload)
                 if request_typ == ExitRequest:
-                    logger("ExitRequest received")
+                    logger(f"{self.id}: ExitRequest received_Daemon")
                     self.client_socket = connect_to_server(self.host, self.port)
                 elif request_typ == LoginRequest:
-                    logger("LoginRequest received")
+                    logger(f"{self.id}: LoginRequest received")
                     self.client_socket.send(format_login_request(self.id))
                 elif request_typ == Send_Client_Info:
-                    logger("Send_Client_Size received")
+                    logger(f"{self.id}: Send_Client_Size received")
                     self.update_client(payload)
                 elif request_typ == Send_Client_Hash:
-                    logger("Send_Client_Hash received")
+                    logger(f"{self.id}: Send_Client_Hash received")
                     hash = single_file_hash(path_to_client_exe)
                     hash_server = payload["hash"]
-                    logger(f"hash_server:  {hash_server}")
-                    logger(f"hash deamon: {hash}")
+                    logger(f"{self.id}: hash_server:  {hash_server}")
+                    logger(f"{self.id}: hash deamon: {hash}")
                     if hash != hash_server:
                         self.client_socket.send(request_new_client({"OS_System":os_system}))
                 
@@ -185,15 +191,15 @@ class Deamon:
                     self.check_client_version()
                     last_req_hashes_time = time.time()
                 
-        except ConnectionResetError:
+        except (ConnectionResetError, ConnectionAbortedError):
             self.run()
         except KeyboardInterrupt:
-            logger("Closing.. Save Config")
+            logger(f"{self.id}: Closing.. Save Config")
             self.t_stop = True
             self.client_socket.close()  # close the connection
             with open("client_config.json", "w") as f:
                 f.write(json.dumps(self.config, indent=2))
-            logger("Exiting")
+            logger(f"{self.id}: Exiting")
             if self.client_process is not None:
                 kill_process_and_children(self.client_process.pid)
 

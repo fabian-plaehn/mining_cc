@@ -28,13 +28,18 @@ elif os_system == "linux":
 else:
     raise Exception("not supported os")
 client_file_name = "client_main" + extension
-server_ip = "100.96.210.95"
-server_port = 5000
 path_to_client_exe = f"{client_folder_name}/{client_file_name}"
 client_process = None
 
 status_data = subprocess.check_output(["tailscale", "status", "--json"]).decode("utf-8")
 status_data = json.loads(status_data)
+
+for node_key, data_dict in status_data["Peer"].items():
+    if "mining-cc-server" in data_dict["DNSName"]:
+        print("Server_found", data_dict["HostName"], data_dict["DNSName"], data_dict["TailscaleIPs"])
+        server_ip = data_dict["TailscaleIPs"][0]
+        server_port = 5000
+        break
 
 tailscale_ip = status_data["TailscaleIPs"][0]
 
@@ -284,7 +289,7 @@ class Client:
             if miner.run_always or miner.active:
                 miner.start()
                 
-    # TODO safe last activated miner and load when booting
+
     def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}
         global current_Miner
         global miner_info_dict

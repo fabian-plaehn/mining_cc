@@ -9,7 +9,7 @@ def connect_to_server(host, port):
             client_socket.connect((host, port))  # connect to the server
             print("successfully connected")
             break
-        except ConnectionRefusedError:
+        except:
             print("connection refused.. try again")
             time.sleep(2)
     client_socket.setblocking(False)

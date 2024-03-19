@@ -55,15 +55,15 @@ class Deamon:
         config["Connection"] = {}
         config["Connection"]["id"] = f"{socket.gethostname()}_deamon"
         config["Connection"]["host"] = tailscale_ip
-        config["Connection"]["port"] = 5001
+        config["Connection"]["port"] = server_port
         with open("client_config.json", "w") as f:
             f.write(json.dumps(config, indent=2))
         logger(f"loaded config: {config}", "info")
 
         self.config = config
         self.id = self.config["Connection"]["id"]
-        self.host = "100.96.210.95"
-        self.port = 5001
+        self.host = tailscale_ip
+        self.port = server_port
         
         self.t_stop = False
         self.test_value = 0

@@ -111,7 +111,7 @@ class Server:
             while True:
                 try: miner_id, data = queue.get_nowait()
                 except Empty: break
-                print(miner_id, data, self.id_dictionary)
+                print(miner_id, data)
                 try: self.id_dictionary[miner_id].send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
                 except: (BlockingIOError, ConnectionAbortedError)
                 

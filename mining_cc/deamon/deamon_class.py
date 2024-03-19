@@ -55,15 +55,15 @@ class Deamon:
         config["Connection"] = {}
         config["Connection"]["id"] = f"{socket.gethostname()}_deamon"
         config["Connection"]["host"] = tailscale_ip
-        config["Connection"]["port"] = 5001
+        config["Connection"]["port"] = server_port
         with open("client_config.json", "w") as f:
             f.write(json.dumps(config, indent=2))
         logger(f"loaded config: {config}", "info")
 
         self.config = config
         self.id = self.config["Connection"]["id"]
-        self.host = "100.96.210.95"
-        self.port = 5001
+        self.server_ip = server_ip
+        self.server_port = server_port
         
         self.t_stop = False
         self.test_value = 0
@@ -154,7 +154,7 @@ class Deamon:
     def run(self):
         try:
             self.start_check_client()
-            self.client_socket = connect_to_server(self.host, self.port)
+            self.client_socket = connect_to_server(self.server_ip, self.server_port)
             check_every = 10
             last_check_time = time.time() - 10
             
@@ -167,7 +167,7 @@ class Deamon:
                 payload = payload_to_dict(payload)
                 if request_typ == ExitRequest:
                     logger(f"{self.id}: ExitRequest received_Daemon")
-                    self.client_socket = connect_to_server(self.host, self.port)
+                    self.client_socket = connect_to_server(self.server_ip, self.server_port)
                 elif request_typ == LoginRequest:
                     logger(f"{self.id}: LoginRequest received")
                     self.client_socket.send(format_login_request(self.id))

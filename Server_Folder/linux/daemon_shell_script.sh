@@ -8,5 +8,6 @@ chmod +x daemon_main
 systemctl enable mining_cc_daemon.service
 systemctl start mining_cc_daemon.service
 
-# wget http://100.96.102.113:4999/linux/shell_script
+#wget http://100.96.102.113:4999/linux/shell_script
+
 # if not GLIBC >=2.34 -> apt update && apt upgrade -y && echo "deb http://archive.ubuntu.com/ubuntu jammy main" >> /etc/apt/sources.list && apt update && apt install tmux -y && apt install libc6 -y

@@ -61,7 +61,7 @@ class Server:
     def run(self):
         # get the hostname
         host = socket.gethostbyname(socket.gethostname())
-        port = 5000  # initiate port no above 1024
+        port = 6000  # initiate port no above 1024
 
         server_socket_clients = socket.socket()  # get instance
         # look closely. The bind() function takes tuple as argument
@@ -72,7 +72,7 @@ class Server:
         
         server_socket_deamons = socket.socket()  # get instance
         # look closely. The bind() function takes tuple as argument
-        server_socket_deamons.bind((host, 5001))  # bind host address and port together
+        server_socket_deamons.bind((host, 6001))  # bind host address and port together
         server_socket_deamons.setblocking(False)
         # configure how many client the server can listen simultaneously
         server_socket_deamons.listen()
@@ -273,7 +273,7 @@ class Server:
 class ServerThread(threading.Thread):
     def __init__(self, app):
         threading.Thread.__init__(self)
-        self.server = make_server(socket.gethostbyname(socket.gethostname()), 4999, app)
+        self.server = make_server(socket.gethostbyname(socket.gethostname()), 5999, app)
         self.ctx = app.app_context()
         self.ctx.push()
 

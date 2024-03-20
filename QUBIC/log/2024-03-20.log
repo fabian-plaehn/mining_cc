@@ -1,0 +1,7 @@
+2024-03-20 10:18:12	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()

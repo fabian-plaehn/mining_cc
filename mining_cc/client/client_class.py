@@ -5,6 +5,7 @@ import random
 import shutil
 import socket
 import subprocess
+from subprocess import Popen, PIPE, STDOUT
 import sys
 import time
 import json
@@ -49,6 +50,7 @@ class Miner_Info:
         self.name = name
         self.exe_name = exe_name
         self.run_always = run_always
+        self.process = None
         self.pid = None
         self.active = False
         self.currently_updating = False
@@ -86,11 +88,11 @@ class Miner_Info:
             logger(f"Start miner: {self.name}")
             try: 
                 if os_system == "windows":
-                    process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
-                    self.pid = process.pid
+                    self.process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..",shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    self.pid = self.process.pid
                 elif os_system == "linux":
-                    process = subprocess.Popen(f"{self.name}/{self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
-                    self.pid = process.pid
+                    self.process = subprocess.Popen(f"{self.name}/{self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
+                    self.pid = self.process.pid
                 print("process started")
             except PermissionError:
                 if os_system == "linux":
@@ -130,6 +132,33 @@ class Miner_Info:
             self.pid = None
         except AttributeError:
             return
+        
+    def get_std_out(self):
+        '''for p in psutil.process_iter():
+            try : print("START Process_NAME: ", p.name(), "CMD: ",p.cmdline(), "EXE: ",p.exe(), "END")
+            except : pass
+        return'''
+    
+        for p in psutil.process_iter():
+            try:
+                for arg in p.cmdline():
+                    if "QUBIC" in arg:
+                        pid_list = get_process_id_and_childen(p.pid)
+                        for pid in pid_list:
+                            proc = psutil.Process(pid)
+                            print("START Process_NAME: ", proc.name(), "CMD: ",proc.cmdline(), "EXE: ",proc.exe(), "END")
+            except psutil.AccessDenied:
+                pass
+        return
+        print("GET_STDOUT: ", self.process)
+        if self.process is not None:
+            print("GET_STDOUT: ", self.process.stdout)
+        if self.process is not None and self.process.stdout is not None:
+            for std_out in self.process.stdout:
+                print(std_out)
+                
+                return 
+                
         
         
 miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"),
@@ -255,7 +284,8 @@ class Client:
                     payload = pickle.loads(payload)
                     self.activate_miner(payload)
                 if (time.time() - last_check_time) > check_every:
-                    logger("Requesting Miner Hashes")
+                    logger("Check On Miner")
+                    if current_Miner is not None: current_Miner.get_std_out()
                     self.start_check_miner()
                     last_check_time = time.time()
                 if (time.time() - last_req_hashes_time) > req_hashes_every:

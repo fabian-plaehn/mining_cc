@@ -111,6 +111,7 @@ class Server:
             if (time.time() - last_check_time) > check_every:
                     self.show_connected_ids()
                     last_check_time = time.time()
+                    logger(f"Number connected usernames: {len(self.id_dictionary)}")
                     for username, data in self.id_dictionary.items():
                         try: data["miner_info"]
                         except: pass

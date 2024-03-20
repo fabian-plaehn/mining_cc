@@ -359,7 +359,7 @@ class Client:
         for key, miner in miner_info_dict.items():
             if miner.run_always:
                 miner.start()
-            miner_info_dict[current_Miner].start()
+            if current_Miner is not None: miner_info_dict[current_Miner].start()
                 
 
     def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}

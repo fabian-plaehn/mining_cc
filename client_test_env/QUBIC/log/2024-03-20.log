@@ -1,98 +1,157 @@
-2024-03-20 10:54:25	ERROR	Error starting: An error occurred trying to start process '/home/fabian/projects/mining_cc/client_test_env/qli-runner' with working directory '/home/fabian/projects/mining_cc/client_test_env'. Permission denied(An error occurred trying to start process '/home/fabian/projects/mining_cc/client_test_env/qli-runner' with working directory '/home/fabian/projects/mining_cc/client_test_env'. Permission denied)
-
-System.ComponentModel.Win32Exception (13): An error occurred trying to start process '/home/fabian/projects/mining_cc/client_test_env/qli-runner' with working directory '/home/fabian/projects/mining_cc/client_test_env'. Permission denied
-   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo, String, String[], String[], String, Boolean, UInt32, UInt32, UInt32[], Int32& , Int32& , Int32& , Boolean, Boolean )
-   at System.Diagnostics.Process.StartCore(ProcessStartInfo)
-   at System.Diagnostics.Process.Start()
-   at li.qubic.trainer.Trainer.StartLocalMining()
-   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo, String, String[], String[], String, Boolean, UInt32, UInt32, UInt32[], Int32& , Int32& , Int32& , Boolean, Boolean )
-   at System.Diagnostics.Process.StartCore(ProcessStartInfo)
-   at System.Diagnostics.Process.Start()
-   at li.qubic.trainer.Trainer.StartLocalMining()
-2024-03-20 10:54:26	ERROR	General error: No process is associated with this object.(No process is associated with this object.)
-
-System.InvalidOperationException: No process is associated with this object.
-   at System.Diagnostics.Process.EnsureState(State)
-   at System.Diagnostics.Process.get_HasExited()
-   at li.qubic.trainer.Trainer.CheckLocalTrainer()
-   at li.qubic.trainer.Trainer.Start()
-   at System.Diagnostics.Process.EnsureState(State)
-   at System.Diagnostics.Process.get_HasExited()
-   at li.qubic.trainer.Trainer.CheckLocalTrainer()
-   at li.qubic.trainer.Trainer.Start()
-2024-03-20 10:54:26	ERROR	Program Error(No process is associated with this object.)
-
-System.InvalidOperationException: No process is associated with this object.
-   at System.Diagnostics.Process.EnsureState(State)
-   at System.Diagnostics.Process.get_HasExited()
-   at li.qubic.trainer.Trainer.StopTrainer(Boolean reInitConnectors)
-   at li.qubic.trainer.Trainer.ChangeSeed(TrainingSeed newSeed)
-   at li.qubic.trainer.Trainer.Start()
-   at Program.Main(String[] args)
-   at System.Diagnostics.Process.EnsureState(State)
-   at System.Diagnostics.Process.get_HasExited()
-   at li.qubic.trainer.Trainer.StopTrainer(Boolean reInitConnectors)
-   at li.qubic.trainer.Trainer.ChangeSeed(TrainingSeed newSeed)
-   at li.qubic.trainer.Trainer.Start()
-   at Program.Main(String[] args)
-2024-03-20 10:54:26	ERROR	Restart Training Process in 10 sec
-2024-03-20 14:01:36	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
-
-System.Exception: API Register Error: ServiceUnavailable
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 14:01:45	ERROR	Failed loading Task. API Error: ServiceUnavailable
-2024-03-20 14:01:58	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
-2024-03-20 14:01:59	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
-
-System.Exception: API Register Error: ServiceUnavailable
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 14:01:59	ERROR	Failed loading Task. API Error: ServiceUnavailable
-2024-03-20 14:01:59	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
-
-System.Exception: API Register Error: ServiceUnavailable
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 14:24:41	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
-2024-03-20 14:27:30	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
+2024-03-20 20:42:19	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 20:42:50	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
 
 System.Exception: API Register Error: GatewayTimeout
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 14:28:48	ERROR	Error Checking for updates: API CheckUpdate Error: GatewayTimeout
-2024-03-20 14:34:01	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
-2024-03-20 14:34:01	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+2024-03-20 20:45:01	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
+2024-03-20 20:45:07	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
+
+System.Exception: API Register Error: Unauthorized
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 20:45:29	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 20:45:38	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
 
 System.Exception: API Register Error: ServiceUnavailable
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 14:34:02	ERROR	Failed loading Task. API Error: ServiceUnavailable
-2024-03-20 14:34:02	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+2024-03-20 20:46:18	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
+2024-03-20 20:46:27	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
 
 System.Exception: API Register Error: ServiceUnavailable
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 14:37:43	ERROR	Failed loading Task. API Error: GatewayTimeout
-2024-03-20 14:39:35	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
-2024-03-20 14:50:02	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
-2024-03-20 14:50:02	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+2024-03-20 20:51:04	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
+
+System.Exception: API Register Error: GatewayTimeout
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 20:51:34	ERROR	Failed loading Task. API Error: GatewayTimeout
+2024-03-20 20:52:29	ERROR	Error Checking for updates: API CheckUpdate Error: GatewayTimeout
+2024-03-20 20:52:38	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
 
 System.Exception: API Register Error: ServiceUnavailable
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-20 15:01:16	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 20:52:46	ERROR	Failed loading Task. API Error: ServiceUnavailable
+2024-03-20 20:53:28	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 20:54:02	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
+
+System.Exception: API Register Error: GatewayTimeout
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 21:08:27	ERROR	Ping error: API Report Error: ServiceUnavailable(API Report Error: ServiceUnavailable)
+
+System.Exception: API Report Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 21:21:41	ERROR	Failed loading Task. API Error: GatewayTimeout
+2024-03-20 21:21:54	ERROR	Ping error: API Report Error: ServiceUnavailable(API Report Error: ServiceUnavailable)
+
+System.Exception: API Report Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 21:22:04	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 21:22:40	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
+
+System.Exception: API Register Error: GatewayTimeout
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 21:30:13	ERROR	Ping error: The request was canceled due to the configured HttpClient.Timeout of 100 seconds elapsing.(The request was canceled due to the configured HttpClient.Timeout of 100 seconds elapsing.)
+
+System.Threading.Tasks.TaskCanceledException: The request was canceled due to the configured HttpClient.Timeout of 100 seconds elapsing.
+ ---> System.TimeoutException: The operation was canceled.
+ ---> System.Threading.Tasks.TaskCanceledException: The operation was canceled.
+   at System.Net.Http.Http2Connection.Http2Stream.<>c.<WaitForDataAsync>b__88_0(Object s, CancellationToken cancellationToken)
+   at System.Threading.CancellationTokenSource.Invoke(Delegate, Object, CancellationTokenSource)
+   at System.Threading.CancellationTokenSource.CallbackNode.ExecuteCallback()
+   at System.Threading.CancellationTokenSource.ExecuteCallbackHandlers(Boolean)
+   at System.Threading.CancellationTokenSource.NotifyCancellation(Boolean)
+   at System.Threading.CancellationTokenSource.TimerCallback(Object state)
+   at System.Threading.TimerQueueTimer.CallCallback(Boolean)
+   at System.Threading.TimerQueueTimer.Fire(Boolean )
+   at System.Threading.TimerQueue.FireNextTimers()
+   at System.Threading.TimerQueue.System.Threading.IThreadPoolWorkItem.Execute()
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+--- End of stack trace from previous location ---
+   at System.Net.Http.Http2Connection.Http2Stream.ReadResponseHeadersAsync(CancellationToken)
+   at System.Net.Http.Http2Connection.SendAsync(HttpRequestMessage, Boolean, CancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage, Boolean, Boolean, CancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage, Boolean, CancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage, HttpCompletionOption, CancellationTokenSource, Boolean, CancellationTokenSource, CancellationToken)
+   --- End of inner exception stack trace ---
+   --- End of inner exception stack trace ---
+   at System.Net.Http.HttpClient.HandleFailure(Exception, Boolean, HttpResponseMessage, CancellationTokenSource, CancellationToken, CancellationTokenSource)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage, HttpCompletionOption, CancellationTokenSource, Boolean, CancellationTokenSource, CancellationToken)
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at System.Net.Http.HttpClient.HandleFailure(Exception, Boolean, HttpResponseMessage, CancellationTokenSource, CancellationToken, CancellationTokenSource)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage, HttpCompletionOption, CancellationTokenSource, Boolean, CancellationTokenSource, CancellationToken)
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+
+   at System.Net.Http.Http2Connection.Http2Stream.<>c.<WaitForDataAsync>b__88_0(Object s, CancellationToken cancellationToken)
+   at System.Threading.CancellationTokenSource.Invoke(Delegate, Object, CancellationTokenSource)
+   at System.Threading.CancellationTokenSource.CallbackNode.ExecuteCallback()
+   at System.Threading.CancellationTokenSource.ExecuteCallbackHandlers(Boolean)
+   at System.Threading.CancellationTokenSource.NotifyCancellation(Boolean)
+   at System.Threading.CancellationTokenSource.TimerCallback(Object state)
+   at System.Threading.TimerQueueTimer.CallCallback(Boolean)
+   at System.Threading.TimerQueueTimer.Fire(Boolean )
+   at System.Threading.TimerQueue.FireNextTimers()
+   at System.Threading.TimerQueue.System.Threading.IThreadPoolWorkItem.Execute()
+   at System.Threading.ThreadPoolWorkQueue.Dispatch()
+   at System.Threading.PortableThreadPool.WorkerThread.WorkerThreadStart()
+   at System.Threading.Thread.StartCallback()
+--- End of stack trace from previous location ---
+   at System.Net.Http.Http2Connection.Http2Stream.ReadResponseHeadersAsync(CancellationToken)
+   at System.Net.Http.Http2Connection.SendAsync(HttpRequestMessage, Boolean, CancellationToken)
+   at System.Net.Http.HttpConnectionPool.SendWithVersionDetectionAndRetryAsync(HttpRequestMessage, Boolean, Boolean, CancellationToken)
+   at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage, Boolean, CancellationToken)
+   at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage, HttpCompletionOption, CancellationTokenSource, Boolean, CancellationTokenSource, CancellationToken)
+2024-03-20 21:47:47	ERROR	Failed loading Task. API Error: GatewayTimeout
+2024-03-20 22:40:55	ERROR	Ping error: API Report Error: GatewayTimeout(API Report Error: GatewayTimeout)
+
+System.Exception: API Report Error: GatewayTimeout
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 22:46:31	ERROR	Ping error: API Report Error: GatewayTimeout(API Report Error: GatewayTimeout)
+
+System.Exception: API Report Error: GatewayTimeout
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 22:51:33	ERROR	Ping error: API Report Error: ServiceUnavailable(API Report Error: ServiceUnavailable)
+
+System.Exception: API Report Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 22:51:37	ERROR	Failed loading Task. API Error: ServiceUnavailable

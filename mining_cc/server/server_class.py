@@ -113,7 +113,7 @@ class Server:
                     last_check_time = time.time()
                     logger(f"Number connected usernames: {len(self.id_dictionary)}")
                     for username, data in self.id_dictionary.items():
-                        try: logger(f"{username}: {data["miner_info"]}")
+                        try: logger(f'{username}: {data["miner_info"]}')
                         except: pass
                     
                     

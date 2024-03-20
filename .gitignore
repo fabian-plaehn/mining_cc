@@ -13,3 +13,4 @@ deamon_main.bin
 client_main.bin
 *.pyc
 __pycache__/
+*zip

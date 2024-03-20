@@ -1,0 +1,98 @@
+2024-03-20 10:54:25	ERROR	Error starting: An error occurred trying to start process '/home/fabian/projects/mining_cc/client_test_env/qli-runner' with working directory '/home/fabian/projects/mining_cc/client_test_env'. Permission denied(An error occurred trying to start process '/home/fabian/projects/mining_cc/client_test_env/qli-runner' with working directory '/home/fabian/projects/mining_cc/client_test_env'. Permission denied)
+
+System.ComponentModel.Win32Exception (13): An error occurred trying to start process '/home/fabian/projects/mining_cc/client_test_env/qli-runner' with working directory '/home/fabian/projects/mining_cc/client_test_env'. Permission denied
+   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo, String, String[], String[], String, Boolean, UInt32, UInt32, UInt32[], Int32& , Int32& , Int32& , Boolean, Boolean )
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo)
+   at System.Diagnostics.Process.Start()
+   at li.qubic.trainer.Trainer.StartLocalMining()
+   at System.Diagnostics.Process.ForkAndExecProcess(ProcessStartInfo, String, String[], String[], String, Boolean, UInt32, UInt32, UInt32[], Int32& , Int32& , Int32& , Boolean, Boolean )
+   at System.Diagnostics.Process.StartCore(ProcessStartInfo)
+   at System.Diagnostics.Process.Start()
+   at li.qubic.trainer.Trainer.StartLocalMining()
+2024-03-20 10:54:26	ERROR	General error: No process is associated with this object.(No process is associated with this object.)
+
+System.InvalidOperationException: No process is associated with this object.
+   at System.Diagnostics.Process.EnsureState(State)
+   at System.Diagnostics.Process.get_HasExited()
+   at li.qubic.trainer.Trainer.CheckLocalTrainer()
+   at li.qubic.trainer.Trainer.Start()
+   at System.Diagnostics.Process.EnsureState(State)
+   at System.Diagnostics.Process.get_HasExited()
+   at li.qubic.trainer.Trainer.CheckLocalTrainer()
+   at li.qubic.trainer.Trainer.Start()
+2024-03-20 10:54:26	ERROR	Program Error(No process is associated with this object.)
+
+System.InvalidOperationException: No process is associated with this object.
+   at System.Diagnostics.Process.EnsureState(State)
+   at System.Diagnostics.Process.get_HasExited()
+   at li.qubic.trainer.Trainer.StopTrainer(Boolean reInitConnectors)
+   at li.qubic.trainer.Trainer.ChangeSeed(TrainingSeed newSeed)
+   at li.qubic.trainer.Trainer.Start()
+   at Program.Main(String[] args)
+   at System.Diagnostics.Process.EnsureState(State)
+   at System.Diagnostics.Process.get_HasExited()
+   at li.qubic.trainer.Trainer.StopTrainer(Boolean reInitConnectors)
+   at li.qubic.trainer.Trainer.ChangeSeed(TrainingSeed newSeed)
+   at li.qubic.trainer.Trainer.Start()
+   at Program.Main(String[] args)
+2024-03-20 10:54:26	ERROR	Restart Training Process in 10 sec
+2024-03-20 14:01:36	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 14:01:45	ERROR	Failed loading Task. API Error: ServiceUnavailable
+2024-03-20 14:01:58	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 14:01:59	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 14:01:59	ERROR	Failed loading Task. API Error: ServiceUnavailable
+2024-03-20 14:01:59	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 14:24:41	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 14:27:30	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
+
+System.Exception: API Register Error: GatewayTimeout
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 14:28:48	ERROR	Error Checking for updates: API CheckUpdate Error: GatewayTimeout
+2024-03-20 14:34:01	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 14:34:01	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 14:34:02	ERROR	Failed loading Task. API Error: ServiceUnavailable
+2024-03-20 14:34:02	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 14:37:43	ERROR	Failed loading Task. API Error: GatewayTimeout
+2024-03-20 14:39:35	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 14:50:02	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-20 14:50:02	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-20 15:01:16	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable

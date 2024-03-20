@@ -20,6 +20,7 @@ Send_Folder_Data = 13
 Send_Folder_Finished = 14
 
 Activate_Miner = 15
+Send_Miner_Data = 16
 
 
 def receive_bytes(conn, count):

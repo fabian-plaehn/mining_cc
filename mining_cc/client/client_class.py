@@ -1,15 +1,18 @@
+from multiprocessing import Process
 import os
 import pickle
 import platform
+import queue
 import random
 import shutil
 import socket
 import subprocess
 from subprocess import Popen, PIPE, STDOUT
 import sys
+import threading
 import time
 import json
-
+import parse
 import keyboard
 import psutil
 
@@ -43,7 +46,7 @@ for node_key, data_dict in status_data["Peer"].items():
         break
 
 tailscale_ip = status_data["TailscaleIPs"][0]
-
+current_miner_stats = {}
 
 class Miner_Info:
     def __init__(self, name, run_always, exe_name, config_name) -> None:
@@ -55,6 +58,8 @@ class Miner_Info:
         self.active = False
         self.currently_updating = False
         self.config_name = config_name
+        self.report_process = threading.Thread(target=self.report_miner_info)
+        self.thread_kill = False
         
     def activate(self, e_json=None):
         if self.active:
@@ -65,19 +70,18 @@ class Miner_Info:
         with open(f"{self.name}/{self.config_name}", "rb") as f:
             miner_config = json.load(f)
         
-        try:
-            miner_config["cpu"]["enabled"] = True
-        except:
-            pass
+        try:miner_config["cpu"]["enabled"] = True
+        except:pass
         
-        if e_json is not None:
-            miner_config = merge(miner_config, e_json)
+        if e_json is not None:miner_config = merge(miner_config, e_json)
 
         with open(f"{self.name}/{self.config_name}", "w") as f:
             json.dump(miner_config, f)
             
         self.active = True 
         self.start()
+        self.thread_kill = False
+        self.report_process.start()
         
     def restart(self):
         self.kill()
@@ -87,16 +91,15 @@ class Miner_Info:
         if self.pid is None:
             logger(f"Start miner: {self.name}")
             try: 
-                if os_system == "windows":
-                    self.process = subprocess.Popen(f"cd {self.name} && {self.exe_name} cd ..",shell=True, stdin=PIPE, stdout=PIPE, stderr=PIPE, close_fds=True) # , creationflags=CREATE_NEW_CONSOLE)
-                    self.pid = self.process.pid
-                elif os_system == "linux":
-                    self.process = subprocess.Popen(f"{self.name}/{self.exe_name}", shell=True) # , creationflags=CREATE_NEW_CONSOLE)
-                    self.pid = self.process.pid
+                if not os.path.isfile(os.path.join(os.getcwd(),self.name,self.exe_name)):
+                    logger(f"Miner {self.name} not found")
+                    return
+                self.process = subprocess.Popen(os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                self.pid = self.process.pid
                 print("process started")
             except PermissionError:
                 if os_system == "linux":
-                    os.popen(f"sudo chmod u+x {self.name}/{self.exe_name}")
+                    os.popen(f"sudo chmod u+x {os.path.join(os.getcwd(),self.name,self.exe_name)}")
                     self.start()
         else:
             pid_list = get_process_id_and_childen(self.pid)
@@ -108,56 +111,54 @@ class Miner_Info:
                 
     def stop(self):
         self.active = False
-        if not self.run_always:
-            self.kill()
+        if self.report_process is not None:
+            self.thread_kill = True
+        if not self.run_always: self.kill()
         else:
             try:
-                with open(f"{self.name}/config.json", "r") as f:
+                with open(os.path.join(os.getcwd(),self.name,self.config_name), "r") as f:
                     miner_config = json.load(f)
-            except FileNotFoundError:
-                return
-            try:
                 miner_config["cpu"]["enabled"] = False
-                with open(f"{self.name}/config.json", "w") as f:
+                with open(os.path.join(os.getcwd(),self.name,self.config_name), "w") as f:
                     json.dump(miner_config, f)
-            except:
-                pass
+            except: pass
                 
     def kill(self):
         try:
             logger(f"Kill Miner: {self.name}, {self.pid}")
-            if self.pid is None:
-                return
+            if self.report_process is not None:
+                self.thread_kill = True
+            if self.pid is None: return
             kill_process_and_children(self.pid)
             self.pid = None
         except AttributeError:
             return
         
-    def get_std_out(self):
-        '''for p in psutil.process_iter():
-            try : print("START Process_NAME: ", p.name(), "CMD: ",p.cmdline(), "EXE: ",p.exe(), "END")
-            except : pass
-        return'''
-    
-        for p in psutil.process_iter():
-            try:
-                for arg in p.cmdline():
-                    if "QUBIC" in arg:
-                        pid_list = get_process_id_and_childen(p.pid)
-                        for pid in pid_list:
-                            proc = psutil.Process(pid)
-                            print("START Process_NAME: ", proc.name(), "CMD: ",proc.cmdline(), "EXE: ",proc.exe(), "END")
-            except psutil.AccessDenied:
-                pass
-        return
-        print("GET_STDOUT: ", self.process)
-        if self.process is not None:
-            print("GET_STDOUT: ", self.process.stdout)
-        if self.process is not None and self.process.stdout is not None:
-            for std_out in self.process.stdout:
-                print(std_out)
+    def report_miner_info(self):
+        global current_miner_stats
+        while True:
+            if self.thread_kill:
+                break
+            if self.name == "QUBIC" and self.process is not None and self.process.stdout is not None:
+                for std_out_p in self.process.stdout:
+                    print(std_out_p)
+                    if self.thread_kill: return
+                    parsed = parse.parse("{date} {time}\tINFO\tE:{epoch} | SOL: {sol}/{sol_total} | Try {id} | {hs} it/s {chunk}\n", std_out_p.decode())
+                    try: current_miner_stats = {"name": self.name, "hashrate":parsed["hs"], "time_stamp":time.time()}
+                    except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
+            time.sleep(1)
+        logger("Thread killed")
+        
                 
-                return 
+'''def get_miner_info(name, process) -> dict:
+    if name == "QUBIC":
+        logger("Listen to STDOUT")
+        if process is not None and process.stdout is not None:
+            for std_out in process.stdout:
+                print(std_out)
+    
+def report_miner_info(socket, get_miner_info, miner_process):
+    pass'''
                 
         
         
@@ -197,19 +198,16 @@ class Client:
         
     def check_miner_versions(self, server_json: dict):
         hash_json = {}
-        for file in os.listdir():
+        for file in os.listdir(os.getcwd()):
             file_path = file
-            if not os.path.isdir(file_path):
+            if not os.path.isdir(os.path.join(os.getcwd(),file_path)):
                 continue
-            # is dir
-            hash_d = single_file_hash(file_path + ".zip")
+            hash_d = single_file_hash(os.path.join(os.getcwd(),file_path+".zip") )
             hash_json[file] = hash_d
         for key, _ in server_json.items():
             if key not in hash_json:
-                print("request 2")
                 self.client_socket.send(request_new_folder({"OS_System":os_system, "folder_name":key}))
             elif server_json[key] != hash_json[key]:
-                print("request")
                 self.client_socket.send(request_new_folder({"OS_System":os_system, "folder_name":key}))
                 
     def new_folder(self, payload):
@@ -259,13 +257,17 @@ class Client:
 
     def run(self):
         global miner_info_dict
+        global current_Miner
+        global current_miner_stats
         self.start_check_miner()
         self.client_socket = connect_to_server(self.host, self.port)
         check_every = 10
-        last_check_time = time.time() - 10
+        last_check_time = time.time()
         
         req_hashes_every = 120
         last_req_hashes_time = time.time() - req_hashes_every
+        #report_process = Process(target=current_Miner.report_miner_info, args=(self.client_socket,))
+        #report_process.start()
         try:
             while True:
                 time.sleep(1)
@@ -285,12 +287,14 @@ class Client:
                     self.activate_miner(payload)
                 if (time.time() - last_check_time) > check_every:
                     logger("Check On Miner")
-                    if current_Miner is not None: current_Miner.get_std_out()
                     self.start_check_miner()
+                    
                     last_check_time = time.time()
                 if (time.time() - last_req_hashes_time) > req_hashes_every:
                     logger("Requesting Miner Hashes")
                     self.client_socket.send(request_miner_hashes({"OS_System":os_system}))
+                    logger("Send Miner Data")
+                    self.client_socket.send(send_pickle_data(Send_Miner_Data, pickle.dumps(current_miner_stats)))
                     last_req_hashes_time = time.time()
                     with open("client_config.json", "w") as f:
                         f.write(json.dumps(self.config, indent=2))
@@ -298,7 +302,7 @@ class Client:
             self.run()
         except KeyboardInterrupt:
             print("Closing.. Save Config")
-            for miner_name, miner in miner_info_dict.items():
+            for _, miner in miner_info_dict.items():
                 miner.kill()
             self.client_socket.close()  # close the connection
             with open("client_config.json", "w") as f:

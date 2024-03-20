@@ -101,6 +101,10 @@ class Server:
                 elif request_typ == Request_New_Folder:
                     logger(f"Request New Folder: {payload}")
                     self.Request_New_Folder(conn, payload)
+                elif request_typ == Send_Miner_Data:
+                    dict_payload = pickle.loads(payload)
+                    print(username, dict_payload)
+                    self.id_dictionary[username]["miner_info"] = dict_payload
                 if username in self.config["Connections"]:
                     self.config["Connections"][username]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 

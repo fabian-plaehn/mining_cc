@@ -104,7 +104,8 @@ class Server:
                 elif request_typ == Send_Miner_Data:
                     dict_payload = pickle.loads(payload)
                     print(username, dict_payload)
-                    self.id_dictionary[username]["miner_info"] = dict_payload
+                    try: self.id_dictionary[username]["miner_info"] = dict_payload
+                    except: pass
                 if username in self.config["Connections"]:
                     self.config["Connections"][username]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 

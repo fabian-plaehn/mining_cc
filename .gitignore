@@ -11,3 +11,5 @@ ZEPH.zip
 test/
 deamon_main.bin
 client_main.bin
+*.pyc
+__pycache__/

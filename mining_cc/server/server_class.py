@@ -103,7 +103,6 @@ class Server:
                     self.Request_New_Folder(conn, payload)
                 elif request_typ == Send_Miner_Data:
                     dict_payload = pickle.loads(payload)
-                    print(username, dict_payload)
                     try: self.id_dictionary[username]["miner_info"] = dict_payload
                     except: pass
                 if username in self.config["Connections"]:
@@ -112,6 +111,10 @@ class Server:
             if (time.time() - last_check_time) > check_every:
                     self.show_connected_ids()
                     last_check_time = time.time()
+                    for username, data in self.id_dictionary.items():
+                        try: data["miner_info"]
+                        except: pass
+                    
                     
             while True:
                 try: miner_id, data = queue.get_nowait()
@@ -243,10 +246,10 @@ class Server:
             conn.setblocking(False)
             return
 
-
     def ExitRequest(self, conn, address, username):
         print("connection deleted")
         self.connection_list.remove([conn, address, username])
+        self.id_dictionary.pop(username)
 
     def LoginRequest(self, conn, address, payload):
         username = payload.decode()

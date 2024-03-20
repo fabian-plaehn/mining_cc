@@ -133,3 +133,25 @@ System.Threading.Tasks.TaskCanceledException: The request was canceled due to th
    at System.Net.Http.RedirectHandler.SendAsync(HttpRequestMessage, Boolean, CancellationToken)
    at System.Net.Http.HttpClient.<SendAsync>g__Core|83_0(HttpRequestMessage, HttpCompletionOption, CancellationTokenSource, Boolean, CancellationTokenSource, CancellationToken)
 2024-03-20 21:47:47	ERROR	Failed loading Task. API Error: GatewayTimeout
+2024-03-20 22:40:55	ERROR	Ping error: API Report Error: GatewayTimeout(API Report Error: GatewayTimeout)
+
+System.Exception: API Report Error: GatewayTimeout
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 22:46:31	ERROR	Ping error: API Report Error: GatewayTimeout(API Report Error: GatewayTimeout)
+
+System.Exception: API Report Error: GatewayTimeout
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 22:51:33	ERROR	Ping error: API Report Error: ServiceUnavailable(API Report Error: ServiceUnavailable)
+
+System.Exception: API Report Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+2024-03-20 22:51:37	ERROR	Failed loading Task. API Error: ServiceUnavailable

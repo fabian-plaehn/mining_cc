@@ -359,6 +359,7 @@ class Client:
         for key, miner in miner_info_dict.items():
             if miner.run_always:
                 miner.start()
+                
             if current_Miner is not None: miner_info_dict[current_Miner].start()
                 
 

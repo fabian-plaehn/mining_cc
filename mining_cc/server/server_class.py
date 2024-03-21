@@ -86,6 +86,8 @@ class Server:
             for conn, address, username in self.connection_list:
                 request_typ, payload = receive_proto_block(conn)
                 payload = payload_to_dict(payload)
+                if username not in self.id_dictionary:
+                    conn.send(format_login_request(""))
                 if request_typ == LoginRequest:
                     self.LoginRequest(conn, address, payload)
                 elif request_typ == ExitRequest:

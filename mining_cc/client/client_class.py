@@ -72,6 +72,7 @@ class Miner_Info:
             return
         
         logger(f"Activate miner: {self.name}")
+        # TODO can crash here
         with open(f"{self.name}/{self.config_name}", "rb") as f:
             miner_config = json.load(f)
         
@@ -366,7 +367,7 @@ class Client:
     def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}
         global current_Miner
         global miner_info_dict
-        
+            
         miner_name = payload["miner_name"]
         config = payload["config"]
         logger(f"set new miner: {miner_name}")  

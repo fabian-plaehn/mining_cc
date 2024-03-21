@@ -1,0 +1,23 @@
+2024-03-21 00:32:15	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
+2024-03-21 00:32:15	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
+
+System.Exception: API Register Error: Unauthorized
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-21 00:32:24	ERROR	Failed loading Task. API Error: ServiceUnavailable
+2024-03-21 00:32:32	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-21 00:36:44	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
+
+System.Exception: API Report Error: Unauthorized
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()
+   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
+   at li.qubic.trainer.Trainer.PingApi()

@@ -113,7 +113,7 @@ class Server:
                     last_check_time = time.time()
                     logger(f"Number connected usernames: {len(self.id_dictionary)}")
                     for username, data in self.id_dictionary.items():
-                        try: logger(f'{username}: {data["miner_info"]}')
+                        try: logger(f'{username}: {self.id_dictionary[username]["miner_info"]}')
                         except: pass
                     
                     
@@ -121,7 +121,7 @@ class Server:
                 try: miner_id, data = queue.get_nowait()
                 except Empty: break
                 print(miner_id, data)
-                try: self.id_dictionary[miner_id].send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
+                try: self.id_dictionary[miner_id]["connection"].send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
                 except: (BlockingIOError, ConnectionAbortedError)
                 
                 
@@ -264,7 +264,7 @@ class Server:
         for i in range(len(self.connection_list)):
             if conn == self.connection_list[i][0] and address == self.connection_list[i][1]:
                 self.connection_list[i][2] = username
-        self.id_dictionary[username] = conn
+        self.id_dictionary[username] = {"connection": conn}
         print(payload)
 
     def check_new_connection(self, server_socket):

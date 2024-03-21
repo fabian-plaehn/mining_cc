@@ -86,8 +86,10 @@ class Server:
             for conn, address, username in self.connection_list:
                 request_typ, payload = receive_proto_block(conn)
                 payload = payload_to_dict(payload)
-                if username not in self.id_dictionary:
-                    conn.send(format_login_request(""))
+                try:
+                    if username not in self.id_dictionary:
+                        conn.send(format_login_request(""))
+                except: pass
                 if request_typ == LoginRequest:
                     self.LoginRequest(conn, address, payload)
                 elif request_typ == ExitRequest:
@@ -117,8 +119,6 @@ class Server:
                     for username, data in self.id_dictionary.items():
                         try: logger(f'{username}: {self.id_dictionary[username]["miner_info"]}')
                         except: pass
-                    
-                    
             while True:
                 try: miner_id, data = queue.get_nowait()
                 except Empty: break

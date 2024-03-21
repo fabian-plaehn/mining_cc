@@ -23,7 +23,7 @@ from flask import Flask, Response, request, send_from_directory
 app = Flask(__name__)
 app.use_x_sendfile = True
 
-server_folder_name = "Server_Folder"
+server_folder_name = "Server_FolderV2"
 
 client_file_name = "client_main"
 deamon_file_name = "deamon_main"

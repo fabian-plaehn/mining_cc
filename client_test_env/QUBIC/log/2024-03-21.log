@@ -1,101 +1,21 @@
-2024-03-21 00:32:15	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
-2024-03-21 00:32:15	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
+2024-03-21 10:18:56	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
+2024-03-21 10:18:57	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
 
 System.Exception: API Register Error: Unauthorized
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-21 00:32:24	ERROR	Failed loading Task. API Error: ServiceUnavailable
-2024-03-21 00:32:32	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
-
-System.Exception: API Register Error: ServiceUnavailable
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-21 00:36:44	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:37:49	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:38:58	ERROR	Ping error: API Report Error: ServiceUnavailable(API Report Error: ServiceUnavailable)
-
-System.Exception: API Report Error: ServiceUnavailable
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:40:22	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:41:22	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:42:23	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:43:23	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:44:23	ERROR	Ping error: API Report Error: Unauthorized(API Report Error: Unauthorized)
-
-System.Exception: API Report Error: Unauthorized
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-   at li.qubic.trainer.Client.Ping(ReportRequest pingRequest)
-   at li.qubic.trainer.Trainer.PingApi()
-2024-03-21 00:46:28	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
-2024-03-21 00:46:28	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
+2024-03-21 10:19:12	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
+2024-03-21 10:19:13	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
 
 System.Exception: API Register Error: Unauthorized
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
    at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-21 00:48:40	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
-2024-03-21 00:48:41	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
-
-System.Exception: API Register Error: Unauthorized
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-21 00:50:28	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
-2024-03-21 00:50:28	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
-
-System.Exception: API Register Error: Unauthorized
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
-   at li.qubic.trainer.Trainer.RegisterFeatures()
-2024-03-21 00:51:26	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
-2024-03-21 00:51:26	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
+2024-03-21 10:21:00	ERROR	Error Checking for updates: API CheckUpdate Error: Unauthorized
+2024-03-21 10:21:01	ERROR	Feature Registration Request Failed(API Register Error: Unauthorized)
 
 System.Exception: API Register Error: Unauthorized
    at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)

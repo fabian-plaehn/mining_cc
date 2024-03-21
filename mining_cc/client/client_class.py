@@ -98,7 +98,8 @@ class Miner_Info:
                 if not os.path.isfile(os.path.join(os.getcwd(),self.name,self.exe_name)):
                     logger(f"Miner {self.name} not found")
                     return
-                self.process = subprocess.Popen(os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                if not self.name == "QUBIC": self.process = subprocess.Popen("sudo " + os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                else:  self.process = subprocess.Popen(os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
                 self.pid = self.process.pid
                 
                 self.thread_kill += 1
@@ -140,8 +141,14 @@ class Miner_Info:
             logger(f"Kill Miner: {self.name}, {self.pid}")
             if self.report_process is not None:
                 self.thread_kill += 1
-            if self.pid is None: return
-            kill_process_and_children(self.pid)
+            for process in psutil.process_iter():
+                for arg in process.cmdline():
+                    if self.name in arg:
+                        print("cleaned :", process.name, process.cmdline())
+                        kill_process_and_children(process.pid)
+                if self.name in process.exe():
+                    print("cleaned :", process.name, process.exe())
+                    kill_process_and_children(process.pid)
             self.pid = None
         except AttributeError:
             return
@@ -191,9 +198,9 @@ def absolut_clean_up():
                     if miner_name in arg:
                         print("cleaned :", process.name, process.cmdline())
                         kill_process_and_children(process.pid)
-            if miner_name in process.exe():
-                print("cleaned :", process.name, process.exe())
-                kill_process_and_children(process.pid)
+                if miner_name in process.exe():
+                    print("cleaned :", process.name, process.exe())
+                    kill_process_and_children(process.pid)
         except: pass
           
 miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"),

@@ -50,11 +50,10 @@ class Server:
                 f.write(json.dumps(config, indent=2))
         print("loaded config: ", config)
         self.config = config
-        self.connection_list = []
-        self.id_dictionary = {}
+        self.connection_dictonary = {}
         
     def show_connected_ids(self):
-        connected_ids = [username for conn, address, username in self.connection_list]
+        connected_ids = [user_info_dict["username"] for conn, user_info_dict in self.connection_dictonary.items()]
         print(connected_ids)
             
         
@@ -83,17 +82,14 @@ class Server:
         while True:
             self.check_new_connection(server_socket_clients)
             self.check_new_connection(server_socket_deamons)
-            for conn, address, username in self.connection_list:
+            for conn, user_info_dict in self.connection_dictonary:
                 request_typ, payload = receive_proto_block(conn)
                 payload = payload_to_dict(payload)
-                try:
-                    if username not in self.id_dictionary:
-                        conn.send(format_login_request(""))
-                except: pass
+                if user_info_dict["username"] == -1 and request_typ != LoginRequest and request_typ != ExitRequest: conn.send(format_login_request(""))
                 if request_typ == LoginRequest:
-                    self.LoginRequest(conn, address, payload)
+                    self.LoginRequest(conn, payload)
                 elif request_typ == ExitRequest:
-                    self.ExitRequest(conn, address, username)
+                    self.ExitRequest(conn)
                 elif request_typ == Request_New_Client:
                     self.Request_New_Client(conn, payload)
                 elif request_typ == Request_Client_Hash:
@@ -107,23 +103,23 @@ class Server:
                     self.Request_New_Folder(conn, payload)
                 elif request_typ == Send_Miner_Data:
                     dict_payload = pickle.loads(payload)
-                    try: self.id_dictionary[username]["miner_info"] = dict_payload
+                    try: self.connection_dictonary[conn]["miner_info"] = dict_payload
                     except: pass
-                if username in self.config["Connections"]:
-                    self.config["Connections"][username]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
+                if user_info_dict["username"] in self.config["Connections"]:
+                    self.config["Connections"][user_info_dict["username"]]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
 
             if (time.time() - last_check_time) > check_every:
                     self.show_connected_ids()
                     last_check_time = time.time()
                     logger(f"Number connected usernames: {len(self.id_dictionary)}")
-                    for username, data in self.id_dictionary.items():
-                        try: logger(f'{username}: {self.id_dictionary[username]["miner_info"]}')
+                    for conn, user_info_dict in self.connection_dictonary.items():
+                        try: logger(f'{user_info_dict["username"]}: {user_info_dict["miner_info"]}')
                         except: pass
             while True:
                 try: miner_id, data = queue.get_nowait()
                 except Empty: break
                 print(miner_id, data)
-                try: self.id_dictionary[miner_id]["connection"].send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
+                try: self.connection_dictonary[self.get_connection_from_user_name(miner_id)].send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
                 except: (BlockingIOError, ConnectionAbortedError)
                 
                 
@@ -249,13 +245,13 @@ class Server:
             conn.setblocking(False)
             return
 
-    def ExitRequest(self, conn, address, username):
+    def ExitRequest(self, conn):
         print("connection deleted")
-        self.connection_list.remove([conn, address, username])
-        self.id_dictionary.pop(username)
+        self.connection_dictonary.pop(conn)
 
-    def LoginRequest(self, conn, address, payload):
+    def LoginRequest(self, conn, payload):
         username = payload.decode()
+        print("LoginRequest: ", username)
         if username in self.config["Connections"]:
             print("old user connected")
         else:
@@ -263,12 +259,13 @@ class Server:
             self.config["Connections"][username] = {"Sheet": "XMR"}
             with open("server_config.json", "w") as f:
                 f.write(json.dumps(self.config, indent=2))
-        for i in range(len(self.connection_list)):
-            if conn == self.connection_list[i][0] and address == self.connection_list[i][1]:
-                self.connection_list[i][2] = username
-        self.id_dictionary[username] = {"connection": conn}
-        print(payload)
+        self.connection_dictonary[conn]["username"] = username
 
+    def get_connection_from_user_name(self, username):
+        for conn, user_info_dict in self.connection_dictonary.items():        
+            if user_info_dict["username"] == username:
+                return conn
+            
     def check_new_connection(self, server_socket):
         while True:
             try:
@@ -276,7 +273,7 @@ class Server:
                 conn.setblocking(False)
                 conn.send(format_login_request(""))
                 print("new connection!")
-                self.connection_list.append([conn, address, -1])
+                self.connection_dictonary[conn] = {"username": -1}
             except BlockingIOError:
                 break
             

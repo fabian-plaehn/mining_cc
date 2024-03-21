@@ -367,11 +367,12 @@ class Client:
     def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}
         global current_Miner
         global miner_info_dict
-            
+
         miner_name = payload["miner_name"]
         config = payload["config"]
         logger(f"set new miner: {miner_name}")  
         self.config["Current_Miner"] = miner_name
+        print("current Miner: ",current_Miner)
         if current_Miner is not None and current_Miner != miner_name:
             miner_info_dict[current_Miner].stop()
             if miner_info_dict[current_Miner].run_always: miner_info_dict[current_Miner].restart()
@@ -382,7 +383,8 @@ class Client:
                 miner.stop()
             current_Miner = miner_name
             miner_info_dict[miner_name].activate(config)
-
+        current_Miner = miner_name
+        
 if __name__ == "__main__":
     pass
 

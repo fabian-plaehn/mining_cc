@@ -103,7 +103,14 @@ class Miner_Info:
                 if not self.name == "QUBIC":
                     self.process = subprocess.Popen("sudo " + os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
                 else:  
-                    self.process = subprocess.Popen(os.path.join(os.getcwd(),self.name,self.exe_name) + f"-t {self.config["Settings"]["amountOfThreads"]} -i {self.config["Settings"]["accessToken"]} -l {self.config["Settings"]["alias"]}", shell=True, cwd=os.path.join(os.getcwd(),self.name)) # , creationflags=CREATE_NEW_CONSOLE)
+                    if self.config is None:
+                        self.activate()
+                    #print(f'{os.path.join(os.getcwd(),self.name,self.exe_name)} -t {self.config["Settings"]["amountOfThreads"]} -i {self.config["Settings"]["accessToken"]} -l {self.config["Settings"]["alias"]}')
+                    args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}']
+                    args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}', "--threads", "23", "--id", f'CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI', "--label", f'{self.config["Settings"]["alias"]}']
+                    self.process = subprocess.Popen(args, cwd=os.path.join(os.getcwd(),self.name)) # , creationflags=CREATE_NEW_CONSOLE)
+                    while True:
+                        pass
                 self.pid = self.process.pid
                 
                 self.thread_kill += 1
@@ -120,7 +127,7 @@ class Miner_Info:
         else:
             pid_list = get_process_id_and_childen(self.pid)
             print(pid_list)
-            if pid_list is None or len(pid_list) < 2:
+            if pid_list is None or len(pid_list) < 1:
                 logger(f"Miner {self.name} not enough processes running")
                 self.restart()
             else:
@@ -154,7 +161,7 @@ class Miner_Info:
                     if self.name in process.exe():
                         print("cleaned :", process.name, process.exe())
                         kill_process_and_children(process.pid)
-                except psutil.AccessDenied:
+                except (psutil.AccessDenied, psutil.ZombieProcess):
                     pass
             self.pid = None
         except AttributeError:
@@ -214,7 +221,7 @@ miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"
                    "XDAG":Miner_Info("XDAG", False, "xmrigDaemon", "config.json"),
                    "RTC":Miner_Info("RTC", False, "xmrigDaemon", "config.json"),
                    "YDA":Miner_Info("YDA", False, "xmrigDaemon", "config.json"),
-                   "QUBIC":Miner_Info("QUBIC", False, "rqiner-x86-znver2", "appsettings.json")}
+                   "QUBIC":Miner_Info("QUBIC", False, "rqiner-x86-znver2", "appsettings.json")} #"rqiner-x86-znver2", "qli-Client"
 
 current_Miner = None
 

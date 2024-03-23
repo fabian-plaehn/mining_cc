@@ -86,7 +86,9 @@ class Server:
             for conn, user_info_dict in self.connection_dictonary.items():
                 request_typ, payload = receive_proto_block(conn)
                 payload = payload_to_dict(payload)
-                if user_info_dict["username"] == -1 and not (request_typ == LoginRequest or request_typ == ExitRequest or request_typ == Empty_Request): conn.send(format_login_request(""))
+                try: 
+                    if user_info_dict["username"] == -1 and not (request_typ == LoginRequest or request_typ == ExitRequest or request_typ == Empty_Request): conn.send(format_login_request(""))
+                except: pass
                 if request_typ == LoginRequest:
                     self.LoginRequest(conn, payload)
                 elif request_typ == ExitRequest:
@@ -211,7 +213,8 @@ class Server:
             hash_json[file] = hash_d
         print(hash_json)
             
-        conn.send(send_miner_hashes(hash_json))
+        try: conn.send(send_miner_hashes(hash_json))
+        except: pass
         
     def Request_New_Folder(self, conn, payload):
         try:
@@ -279,7 +282,7 @@ class Server:
                 conn.send(format_login_request(""))
                 print("new connection!")
                 self.connection_dictonary[conn] = {"username": -1}
-            except BlockingIOError:
+            except:
                 break
             
 

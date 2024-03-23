@@ -51,6 +51,7 @@ class Server:
         print("loaded config: ", config)
         self.config = config
         self.connection_dictonary = {}
+        self.connections_to_be_deleted = []
         
     def show_connected_ids(self):
         connected_ids = [user_info_dict["username"] for conn, user_info_dict in self.connection_dictonary.items()]
@@ -82,10 +83,10 @@ class Server:
         while True:
             self.check_new_connection(server_socket_clients)
             self.check_new_connection(server_socket_deamons)
-            for conn, user_info_dict in self.connection_dictonary:
+            for conn, user_info_dict in self.connection_dictonary.items():
                 request_typ, payload = receive_proto_block(conn)
                 payload = payload_to_dict(payload)
-                if user_info_dict["username"] == -1 and request_typ != LoginRequest and request_typ != ExitRequest: conn.send(format_login_request(""))
+                if user_info_dict["username"] == -1 and not (request_typ == LoginRequest or request_typ == ExitRequest or request_typ == Empty_Request): conn.send(format_login_request(""))
                 if request_typ == LoginRequest:
                     self.LoginRequest(conn, payload)
                 elif request_typ == ExitRequest:
@@ -107,11 +108,11 @@ class Server:
                     except: pass
                 if user_info_dict["username"] in self.config["Connections"]:
                     self.config["Connections"][user_info_dict["username"]]["Last_seen"] = datetime.today().strftime("%Y/%m/%d %H:%M:%S")
-
+            self.execute_clean_up_connections()
             if (time.time() - last_check_time) > check_every:
                     self.show_connected_ids()
                     last_check_time = time.time()
-                    logger(f"Number connected usernames: {len(self.id_dictionary)}")
+                    logger(f"Number connected usernames: {len(self.connection_dictonary)}")
                     for conn, user_info_dict in self.connection_dictonary.items():
                         try: logger(f'{user_info_dict["username"]}: {user_info_dict["miner_info"]}')
                         except: pass
@@ -119,7 +120,7 @@ class Server:
                 try: miner_id, data = queue.get_nowait()
                 except Empty: break
                 print(miner_id, data)
-                try: self.connection_dictonary[self.get_connection_from_user_name(miner_id)].send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
+                try: self.get_connection_from_user_name(miner_id).send(send_pickle_data(Activate_Miner, pickle.dumps(data)))
                 except: (BlockingIOError, ConnectionAbortedError)
                 
                 
@@ -247,7 +248,11 @@ class Server:
 
     def ExitRequest(self, conn):
         print("connection deleted")
-        self.connection_dictonary.pop(conn)
+        self.connections_to_be_deleted.append(conn)
+
+    def execute_clean_up_connections(self):
+        for connection in self.connections_to_be_deleted:
+            self.connection_dictonary.pop(connection)
 
     def LoginRequest(self, conn, payload):
         username = payload.decode()

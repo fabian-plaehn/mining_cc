@@ -60,7 +60,7 @@ class Miner_Info:
         self.active = False
         self.currently_updating = False
         self.config_name = config_name
-        
+        self.config = None
         self.thread_kill = 0
         self.report_process = threading.Thread(target=self.report_miner_info, args=(self.thread_kill,))
         self.report_process.daemon = True
@@ -80,7 +80,7 @@ class Miner_Info:
         except:pass
         
         if e_json is not None:miner_config = merge(miner_config, e_json)
-
+        self.config = miner_config
         with open(f"{self.name}/{self.config_name}", "w") as f:
             json.dump(miner_config, f)
             
@@ -93,13 +93,17 @@ class Miner_Info:
         
     def start(self):
         logger(f"Try start miner: {self.name}")
+        if self.currently_updating:
+            logger("Miner is updating dont start")
         if self.pid is None:
             try: 
                 if not os.path.isfile(os.path.join(os.getcwd(),self.name,self.exe_name)):
                     logger(f"Miner {self.name} not found")
                     return
-                if not self.name == "QUBIC": self.process = subprocess.Popen("sudo " + os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
-                else:  self.process = subprocess.Popen(os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                if not self.name == "QUBIC":
+                    self.process = subprocess.Popen("sudo " + os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                else:  
+                    self.process = subprocess.Popen(os.path.join(os.getcwd(),self.name,self.exe_name) + f"-t {self.config["Settings"]["amountOfThreads"]} -i {self.config["Settings"]["accessToken"]} -l {self.config["Settings"]["alias"]}", shell=True, cwd=os.path.join(os.getcwd(),self.name)) # , creationflags=CREATE_NEW_CONSOLE)
                 self.pid = self.process.pid
                 
                 self.thread_kill += 1
@@ -142,13 +146,16 @@ class Miner_Info:
             if self.report_process is not None:
                 self.thread_kill += 1
             for process in psutil.process_iter():
-                for arg in process.cmdline():
-                    if self.name in arg:
-                        print("cleaned :", process.name, process.cmdline())
+                try:
+                    for arg in process.cmdline():
+                        if self.name in arg:
+                            print("cleaned :", process.name, process.cmdline())
+                            kill_process_and_children(process.pid)
+                    if self.name in process.exe():
+                        print("cleaned :", process.name, process.exe())
                         kill_process_and_children(process.pid)
-                if self.name in process.exe():
-                    print("cleaned :", process.name, process.exe())
-                    kill_process_and_children(process.pid)
+                except psutil.AccessDenied:
+                    pass
             self.pid = None
         except AttributeError:
             return
@@ -207,7 +214,7 @@ miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"
                    "XDAG":Miner_Info("XDAG", False, "xmrigDaemon", "config.json"),
                    "RTC":Miner_Info("RTC", False, "xmrigDaemon", "config.json"),
                    "YDA":Miner_Info("YDA", False, "xmrigDaemon", "config.json"),
-                   "QUBIC":Miner_Info("QUBIC", False, "qli-Client", "appsettings.json")}
+                   "QUBIC":Miner_Info("QUBIC", False, "rqiner-x86-znver2", "appsettings.json")}
 
 current_Miner = None
 
@@ -278,10 +285,8 @@ class Client:
         logger(f"[RECV] File data received.")
         if os.path.isdir(folder_name):
             miner_info_dict[folder_name].currently_updating = True
-            if miner_info_dict[folder_name].pid is not None:
-                print(get_process_id_and_childen(miner_info_dict[folder_name].pid))
-                kill_process_and_children(miner_info_dict[folder_name].pid)
-                # new version
+            miner_info_dict[folder_name].kill()
+            # new version
             time.sleep(0.1)
             shutil.rmtree(f"{folder_name}")
         try:
@@ -368,7 +373,7 @@ class Client:
             if miner.run_always:
                 miner.start()
                 
-            if current_Miner is not None: miner_info_dict[current_Miner].start()
+        if current_Miner is not None: miner_info_dict[current_Miner].start()
                 
 
     def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}
@@ -394,6 +399,9 @@ class Client:
         
 if __name__ == "__main__":
     pass
+
+# TODO -> YDA/RTC/ZEPH/XDAG just need 1 miner just switch config.json
+# CHECK RANDOMX PERFORMANCE? IS IT EVEN WORTH IT NOW? HIVEOS CUSTOM MINER SEEMS FINE
 
 #wget -O qli-Service-install.sh https://dl.qubic.li/cloud-init/qli-Service-install.sh
 #chmod u+x qli-Service-install.sh

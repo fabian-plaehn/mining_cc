@@ -1,0 +1,10 @@
+{
+"threads": 18,
+"payout_id": "CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI",
+"label": "BigOne",
+"binary_info":{
+    "arch":"x86",
+    "os":"linux",
+    "instruction_set": "avx2"
+    }
+}

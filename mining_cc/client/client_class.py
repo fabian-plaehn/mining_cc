@@ -103,14 +103,13 @@ class Miner_Info:
                 if not self.name == "QUBIC":
                     self.process = subprocess.Popen("sudo " + os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
                 else:  
-                    if self.config is None:
+                    '''if self.config is None:
                         self.activate()
-                    #print(f'{os.path.join(os.getcwd(),self.name,self.exe_name)} -t {self.config["Settings"]["amountOfThreads"]} -i {self.config["Settings"]["accessToken"]} -l {self.config["Settings"]["alias"]}')
+                        return'''
                     args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}']
-                    args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}', "--threads", "23", "--id", f'CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI', "--label", f'{self.config["Settings"]["alias"]}']
-                    self.process = subprocess.Popen(args, cwd=os.path.join(os.getcwd(),self.name)) # , creationflags=CREATE_NEW_CONSOLE)
-                    while True:
-                        pass
+                    #args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}', "--threads", "23", "--id", f'CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI', "--label", f'{self.config["Settings"]["alias"]}']
+                    self.process = subprocess.Popen(args, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                    self.pid = self.process.pid
                 self.pid = self.process.pid
                 
                 self.thread_kill += 1
@@ -161,7 +160,7 @@ class Miner_Info:
                     if self.name in process.exe():
                         print("cleaned :", process.name, process.exe())
                         kill_process_and_children(process.pid)
-                except (psutil.AccessDenied, psutil.ZombieProcess):
+                except:
                     pass
             self.pid = None
         except AttributeError:
@@ -182,6 +181,8 @@ class Miner_Info:
                         print(parsed)
                         try: current_miner_stats = {"name": self.name, "hashrate":float(parsed["hs"]), "time_stamp":time.time()}
                         except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
+                        sys.stdout.flush()
+                        
                 if self.name in miner_name_to_api_port:
                     for std_out_p in self.process.stdout:
                         print(std_out_p)
@@ -189,6 +190,7 @@ class Miner_Info:
                         answer = requests.get(f"http://127.0.0.1:{miner_name_to_api_port[self.name]}/2/summary")
                         try: current_miner_stats = {"name": self.name, "hashrate":float(answer.json()["hashrate"]["total"][0]), "time_stamp":time.time()}
                         except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
+                        sys.stdout.flush()
                 time.sleep(1)
             except: pass
         logger("Reporter Thread killed")
@@ -221,7 +223,7 @@ miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"
                    "XDAG":Miner_Info("XDAG", False, "xmrigDaemon", "config.json"),
                    "RTC":Miner_Info("RTC", False, "xmrigDaemon", "config.json"),
                    "YDA":Miner_Info("YDA", False, "xmrigDaemon", "config.json"),
-                   "QUBIC":Miner_Info("QUBIC", False, "rqiner-x86-znver2", "appsettings.json")} #"rqiner-x86-znver2", "qli-Client"
+                   "QUBIC":Miner_Info("QUBIC", False, "qli-Client", "appsettings.json")} #"rqiner-x86-znver2", "qli-Client"
 
 current_Miner = None
 

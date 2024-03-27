@@ -72,6 +72,7 @@ class Miner_Info:
             return
         
         logger(f"Activate miner: {self.name}")
+        
         # TODO can crash here
         with open(f"{self.name}/{self.config_name}", "rb") as f:
             miner_config = json.load(f)
@@ -410,7 +411,6 @@ if __name__ == "__main__":
     pass
 
 # TODO -> YDA/RTC/ZEPH/XDAG just need 1 miner just switch config.json
-# CHECK RANDOMX PERFORMANCE? IS IT EVEN WORTH IT NOW? HIVEOS CUSTOM MINER SEEMS FINE
 
 #wget -O qli-Service-install.sh https://dl.qubic.li/cloud-init/qli-Service-install.sh
 #chmod u+x qli-Service-install.sh

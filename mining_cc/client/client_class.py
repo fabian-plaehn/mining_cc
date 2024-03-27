@@ -67,7 +67,6 @@ class Miner:
         if flight_sheet == self.current_flight_sheet:
             return
         
-        # TODO can crash here
         config_path = os.path.join(os.getcwd(), flight_sheet["miner_name"], miner_info_dict[flight_sheet["miner_name"]].miner_to_settings_name)
         try:
             with open(config_path, "rb") as f:
@@ -99,14 +98,14 @@ class Miner:
             logger("Miner is updating dont start")
             return
         
-        if self.process.pid is None:
+        if self.process is None:
             excec_path = os.path.join(os.getcwd(),self.miner_name ,miner_info_dict[self.miner_name].exec_name)
             try: 
                 if not os.path.isfile(excec_path):
-                    logger(f"Miner {self.name} not found")
+                    logger(f"Miner {self.miner_name} not found")
                     return
-                if not self.name == "QUBIC":
-                    self.process = subprocess.Popen("sudo " + excec_path, shell=False, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                if not self.miner_name == "qli-Client":
+                    self.process = subprocess.Popen("sudo " + excec_path, shell=True, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
                 else:  
                     #args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}', "--threads", "23", "--id", f'CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI', "--label", f'{self.config["Settings"]["alias"]}']
                     self.process = subprocess.Popen(excec_path, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
@@ -156,7 +155,7 @@ class Miner:
                         try: current_miner_stats = {"name": self.name, "hashrate":float(parsed["hs"]), "time_stamp":time.time()}
                         except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
                         sys.stdout.flush()
-                if self.miner_name in miner_name_to_api_port:
+                if self.coin_name in miner_name_to_api_port:
                     for std_out_p in self.process.stdout:
                         print(std_out_p)
                         if thread_id < self.thread_kill: break
@@ -166,6 +165,7 @@ class Miner:
                         sys.stdout.flush()
                 time.sleep(1)
             except: pass
+            print("threading")
         logger("Reporter Thread killed")
         
 '''def get_miner_info(name, process) -> dict:
@@ -218,10 +218,10 @@ class Client:
             print("config not found. Creating one")
             config = {}
             config["Current_Miner"] = None
-        config["Connection"] = {}
-        config["Connection"]["id"] = socket.gethostname()
-        config["Connection"]["host"] = tailscale_ip
-        config["Connection"]["port"] = 5000
+            config["Connection"] = {}
+            config["Connection"]["id"] = socket.gethostname()
+            config["Connection"]["host"] = tailscale_ip
+            config["Connection"]["port"] = 5000
 
         with open("client_config.json", "w") as f:
             f.write(json.dumps(config, indent=2))
@@ -241,12 +241,16 @@ class Client:
             file_path = file
             if not os.path.isdir(os.path.join(os.getcwd(),file_path)):
                 continue
-            hash_d = single_file_hash(os.path.join(os.getcwd(),file_path+".zip") )
-            hash_json[file] = hash_d
+            try:
+                hash_d = single_file_hash(os.path.join(os.getcwd(),file_path+".zip") )
+                hash_json[file] = hash_d
+            except: pass
         for key, _ in server_json.items():
             if key not in hash_json:
+                logger("Request new folder")
                 self.client_socket.send(request_new_folder({"OS_System":os_system, "folder_name":key}))
             elif server_json[key] != hash_json[key]:
+                logger(f"Request updated folder Server: {server_json[key]} Local: {hash_json[key]}")
                 self.client_socket.send(request_new_folder({"OS_System":os_system, "folder_name":key}))
                 
     def new_folder(self, payload):
@@ -274,9 +278,11 @@ class Client:
 
         logger(f"[RECV] File data received.")
         if os.path.isdir(folder_name):
-            miner_info_dict[folder_name].currently_updating = True
-            miner_info_dict[folder_name].kill()
-            # new version
+            try:
+                miner_info_dict[folder_name].currently_updating = True
+                if current_Miner.miner_name == folder_name:
+                    current_Miner.kill()
+            except: pass
             time.sleep(0.1)
             shutil.rmtree(f"{folder_name}")
         try:
@@ -289,7 +295,8 @@ class Client:
                 if os.path.isfile(folder_name + "/" + file):
                     subprocess.check_call(['chmod', '+x', folder_name+"/"+file])
                     #os.popen(f"sudo chmod u+x {folder_name}/{file}")
-        miner_info_dict[folder_name].currently_updating = False
+        try: miner_info_dict[folder_name].currently_updating = False
+        except: pass
         self.client_socket.setblocking(False)
 
     def run(self):
@@ -304,8 +311,6 @@ class Client:
         
         req_hashes_every = 120
         last_req_hashes_time = time.time() - req_hashes_every
-        #report_process = Process(target=current_Miner.report_miner_info, args=(self.client_socket,))
-        #report_process.start()
         try:
             while True:
                 time.sleep(1)
@@ -328,12 +333,12 @@ class Client:
                     self.start_check_miner()
                     print(current_miner_stats)
                     self.client_socket.send(send_pickle_data(Send_Miner_Data, pickle.dumps(current_miner_stats)))
+                    current_miner_stats = {}
                     last_check_time = time.time()
                 if (time.time() - last_req_hashes_time) > req_hashes_every:
                     logger("Requesting Miner Hashes")
                     self.client_socket.send(request_miner_hashes({"OS_System":os_system}))
                     logger("Send Miner Data")
-                    
                     last_req_hashes_time = time.time()
                     with open("client_config.json", "w") as f:
                         f.write(json.dumps(self.config, indent=2))
@@ -341,9 +346,8 @@ class Client:
             self.run()
         except KeyboardInterrupt:
             print("Closing.. Save Config")
-            for _, miner in miner_info_dict.items():
-                miner.kill()
             absolut_clean_up()
+            current_Miner.thread_kill += 1
             self.client_socket.close()  # close the connection
             with open("client_config.json", "w") as f:
                 f.write(json.dumps(self.config, indent=2))
@@ -359,11 +363,8 @@ class Client:
                     if name.endswith(".json"):
                         continue
                     subprocess.check_call(['chmod', '+x', os.path.join(path, name)])
-        for key, miner in miner_info_dict.items():
-            if miner.run_always:
-                miner.start()
-                
-        if current_Miner is not None: miner_info_dict[current_Miner].start()
+
+        current_Miner.start()
                 
 
     def activate_miner(self, payload):  # payload {"miner_name": miner_name,"coin_name":coin_name, "config": {}}

@@ -1,5 +1,26 @@
 {
-  "Current_Miner": "QUBIC",
+  "Current_Miner": {
+    "miner_name": "xmrig-cc",
+    "coin_name": "XDAG",
+    "config": {
+      "pools": [
+        {
+          "algo": null,
+          "url": "de.zephyr.herominers.com:1124",
+          "user": "ZEPHYR2Kur2T72QpzZRqpBRAHXhRT6TLsV2GibYHpubiZYWUpC39gFDW8GYZ9ev4Bd5T7xZN96TWH9ZwZkQ5qRwgKkWBwSsFZRP41",
+          "pass": "x"
+        }
+      ],
+      "http": {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 58001
+      },
+      "randomx": {
+        "random1gb-pages": true
+      }
+    }
+  },
   "Connection": {
     "id": "DESKTOP-LIJOB68",
     "host": "100.126.5.61",

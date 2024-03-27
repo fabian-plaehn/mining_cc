@@ -17,7 +17,7 @@ import parse
 import keyboard
 import psutil
 import requests
-
+from dataclasses import dataclass
 from mining_cc.shared.hashes import dirhash, single_file_hash
 
 from mining_cc.shared.utils import get_process_id_and_childen, kill_process_and_children, logger, merge, payload_to_dict
@@ -50,122 +50,95 @@ for node_key, data_dict in status_data["Peer"].items():
 tailscale_ip = status_data["TailscaleIPs"][0]
 current_miner_stats = {}
 
-class Miner_Info:
-    def __init__(self, name, run_always, exe_name, config_name) -> None:
-        self.name = name
-        self.exe_name = exe_name
-        self.run_always = run_always
+class Miner:
+    def __init__(self) -> None:
+        self.coin_name = None
+        self.miner_name = None
+        self.run_always = None
         self.process = None
-        self.pid = None
-        self.active = False
-        self.currently_updating = False
-        self.config_name = config_name
-        self.config = None
+        self.current_flight_sheet = None
         self.thread_kill = 0
         self.report_process = threading.Thread(target=self.report_miner_info, args=(self.thread_kill,))
         self.report_process.daemon = True
+        self.report_process.start()
         
         
-    def activate(self, e_json=None):
-        if self.active:
-            logger(f"Miner {self.name} already active")
+    def activate(self, flight_sheet):  # payload {"miner_name": miner_name,"coin_name":coin_name, "config": {}}
+        if flight_sheet == self.current_flight_sheet:
             return
         
-        logger(f"Activate miner: {self.name}")
-        
         # TODO can crash here
-        with open(f"{self.name}/{self.config_name}", "rb") as f:
-            miner_config = json.load(f)
+        config_path = os.path.join(os.getcwd(), flight_sheet["miner_name"], miner_info_dict[flight_sheet["miner_name"]].miner_to_settings_name)
+        try:
+            with open(config_path, "rb") as f:
+                miner_config = json.load(f)
+        except FileNotFoundError: pass
         
-        try:miner_config["cpu"]["enabled"] = True
-        except:pass
-        
-        if e_json is not None:miner_config = merge(miner_config, e_json)
-        self.config = miner_config
-        with open(f"{self.name}/{self.config_name}", "w") as f:
+        miner_config = merge(miner_config, flight_sheet["config"])
+        with open(config_path, "w") as f:
             json.dump(miner_config, f)
             
-        self.active = True 
-        self.start()
+        self.coin_name = flight_sheet["coin_name"]
+        self.current_flight_sheet = flight_sheet
         
+        if self.miner_name == flight_sheet["miner_name"] and miner_info_dict[flight_sheet["miner_name"]].miner_need_restart_after_config_change:
+            self.restart()
+        elif self.miner_name != flight_sheet["miner_name"]:
+            self.kill()
+            self.miner_name = flight_sheet["miner_name"]
+            self.start()
+
     def restart(self):
         self.kill()
         self.start()
         
     def start(self):
-        logger(f"Try start miner: {self.name}")
-        if self.currently_updating:
+        global miner_info_dict
+        logger(f"Try start miner: {self.coin_name} {self.miner_name}")
+        if miner_info_dict[self.miner_name].currently_updating:
             logger("Miner is updating dont start")
-        if self.pid is None:
+            return
+        
+        if self.process.pid is None:
+            excec_path = os.path.join(os.getcwd(),self.miner_name ,miner_info_dict[self.miner_name].exec_name)
             try: 
-                if not os.path.isfile(os.path.join(os.getcwd(),self.name,self.exe_name)):
+                if not os.path.isfile(excec_path):
                     logger(f"Miner {self.name} not found")
                     return
                 if not self.name == "QUBIC":
-                    self.process = subprocess.Popen("sudo " + os.path.join(os.getcwd(),self.name,self.exe_name), shell=True, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                    self.process = subprocess.Popen("sudo " + excec_path, shell=False, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
                 else:  
-                    '''if self.config is None:
-                        self.activate()
-                        return'''
-                    args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}']
                     #args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}', "--threads", "23", "--id", f'CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI', "--label", f'{self.config["Settings"]["alias"]}']
-                    self.process = subprocess.Popen(args, cwd=os.path.join(os.getcwd(),self.name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
-                    self.pid = self.process.pid
-                self.pid = self.process.pid
-                
-                self.thread_kill += 1
-                self.report_process = threading.Thread(target=self.report_miner_info, args=(self.thread_kill,))
-                self.report_process.daemon = True
-                
-                self.report_process.start()
+                    self.process = subprocess.Popen(excec_path, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
                 print("process started")
             except PermissionError:
                 logger("Permission error")
                 if os_system == "linux":
-                    os.popen(f"sudo chmod u+x {os.path.join(os.getcwd(),self.name,self.exe_name)}")
+                    os.popen(f"sudo chmod u+x {excec_path}")
                     self.start()
         else:
-            pid_list = get_process_id_and_childen(self.pid)
+            pid_list = get_process_id_and_childen(self.process.pid)
             print(pid_list)
             if pid_list is None or len(pid_list) < 1:
-                logger(f"Miner {self.name} not enough processes running")
+                logger(f"Miner {self.miner_name} not enough processes running")
                 self.restart()
             else:
-                logger(f"Miner {self.name} already running")
-                
-    def stop(self):
-        self.active = False
-        if self.report_process is not None:
-            self.thread_kill += 1
-        if not self.run_always: self.kill()
-        else:
-            try:
-                with open(os.path.join(os.getcwd(),self.name,self.config_name), "r") as f:
-                    miner_config = json.load(f)
-                miner_config["cpu"]["enabled"] = False
-                with open(os.path.join(os.getcwd(),self.name,self.config_name), "w") as f:
-                    json.dump(miner_config, f)
-            except: pass
+                logger(f"Miner {self.miner_name} already running")
                 
     def kill(self):
-        try:
-            logger(f"Kill Miner: {self.name}, {self.pid}")
-            if self.report_process is not None:
-                self.thread_kill += 1
-            for process in psutil.process_iter():
-                try:
+        global miner_info_dict
+        for miner_name, _ in miner_info_dict.items():
+            try:
+                for process in psutil.process_iter():
                     for arg in process.cmdline():
-                        if self.name in arg:
+                        if miner_name in arg:
                             print("cleaned :", process.name, process.cmdline())
                             kill_process_and_children(process.pid)
-                    if self.name in process.exe():
+                    if miner_name in process.exe():
                         print("cleaned :", process.name, process.exe())
                         kill_process_and_children(process.pid)
-                except:
-                    pass
-            self.pid = None
-        except AttributeError:
-            return
+            except: pass
+        self.process = None
         
     def report_miner_info(self, thread_id):
         logger("Reporter thread started")
@@ -174,7 +147,7 @@ class Miner_Info:
         while True:
             try:
                 if thread_id < self.thread_kill: break
-                if self.name == "QUBIC" and self.process is not None and self.process.stdout is not None:
+                if self.miner_name == "qli-Client" and self.process is not None and self.process.stdout is not None:
                     for std_out_p in self.process.stdout:
                         print(std_out_p)
                         if thread_id < self.thread_kill: break
@@ -183,14 +156,13 @@ class Miner_Info:
                         try: current_miner_stats = {"name": self.name, "hashrate":float(parsed["hs"]), "time_stamp":time.time()}
                         except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
                         sys.stdout.flush()
-                        
-                if self.name in miner_name_to_api_port:
+                if self.miner_name in miner_name_to_api_port:
                     for std_out_p in self.process.stdout:
                         print(std_out_p)
                         if thread_id < self.thread_kill: break
                         answer = requests.get(f"http://127.0.0.1:{miner_name_to_api_port[self.name]}/2/summary")
-                        try: current_miner_stats = {"name": self.name, "hashrate":float(answer.json()["hashrate"]["total"][0]), "time_stamp":time.time()}
-                        except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
+                        try: current_miner_stats = {"name": self.coin_name, "hashrate":float(answer.json()["hashrate"]["total"][0]), "time_stamp":time.time()}
+                        except: current_miner_stats = {"name": self.coin_name, "hashrate":0, "time_stamp":time.time()}
                         sys.stdout.flush()
                 time.sleep(1)
             except: pass
@@ -219,14 +191,22 @@ def absolut_clean_up():
                     print("cleaned :", process.name, process.exe())
                     kill_process_and_children(process.pid)
         except: pass
-          
-miner_info_dict = {"ZEPH":Miner_Info("ZEPH", False, "xmrigDaemon", "config.json"),
-                   "XDAG":Miner_Info("XDAG", False, "xmrigDaemon", "config.json"),
-                   "RTC":Miner_Info("RTC", False, "xmrigDaemon", "config.json"),
-                   "YDA":Miner_Info("YDA", False, "xmrigDaemon", "config.json"),
-                   "QUBIC":Miner_Info("QUBIC", False, "qli-Client", "appsettings.json")} #"rqiner-x86-znver2", "qli-Client"
-
-current_Miner = None
+        
+@dataclass
+class Miner_Info:
+    name: str
+    miner_to_settings_name: str
+    miner_need_restart_after_config_change: bool
+    currently_updating: bool = False
+    exec_name: str = "start"
+    
+miner_info_dict = {
+                "xmrig-cc": Miner_Info("xmrig-cc", "config.json", False),
+                "rqiner-x86-znver2": Miner_Info("rqiner-x86-znver2", "cmd_line", True),
+                "qli-Client": Miner_Info("qli-Client", "appsettings.json", True)
+                }
+        
+current_Miner = Miner()
 
 class Client:
     def __init__(self):
@@ -253,7 +233,7 @@ class Client:
         self.port = server_port
         
         if "Current_Miner" in self.config and self.config["Current_Miner"] is not None:
-            current_Miner = self.config["Current_Miner"]
+            current_Miner.activate(self.config["Current_Miner"])
         
     def check_miner_versions(self, server_json: dict):
         hash_json = {}
@@ -386,26 +366,16 @@ class Client:
         if current_Miner is not None: miner_info_dict[current_Miner].start()
                 
 
-    def activate_miner(self, payload):  # payload {"miner_name": miner_name, "config": {}}
+    def activate_miner(self, payload):  # payload {"miner_name": miner_name,"coin_name":coin_name, "config": {}}
         global current_Miner
-        global miner_info_dict
-
-        miner_name = payload["miner_name"]
-        config = payload["config"]
-        logger(f"set new miner: {miner_name}")  
-        self.config["Current_Miner"] = miner_name
-        print("current Miner: ",current_Miner)
-        if current_Miner is not None and current_Miner != miner_name:
-            miner_info_dict[current_Miner].stop()
-            if miner_info_dict[current_Miner].run_always: miner_info_dict[current_Miner].restart()
-            current_Miner = miner_info_dict[miner_name]
-            miner_info_dict[miner_name].activate(config)
-        elif current_Miner is None:
-            for name, miner in miner_info_dict.items():
-                miner.stop()
-            current_Miner = miner_name
-            miner_info_dict[miner_name].activate(config)
-        current_Miner = miner_name
+        
+        try: coin_name = payload["coin_name"]
+        except: coin_name = None
+        
+        logger(f"set miner for: {coin_name}")  
+        self.config["Current_Miner"] = payload
+        current_Miner.activate(payload)
+        
         
 if __name__ == "__main__":
     pass

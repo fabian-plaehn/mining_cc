@@ -1,0 +1,34 @@
+2024-03-23 10:41:51	ERROR	Error Checking for updates: API CheckUpdate Error: ServiceUnavailable
+2024-03-23 10:43:37	ERROR	Feature Registration Request Failed(API Register Error: GatewayTimeout)
+
+System.Exception: API Register Error: GatewayTimeout
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-23 10:44:07	ERROR	Failed loading Task. API Error: GatewayTimeout
+2024-03-23 10:44:48	ERROR	Feature Registration Request Failed(API Register Error: ServiceUnavailable)
+
+System.Exception: API Register Error: ServiceUnavailable
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+   at li.qubic.trainer.Client.Register(TrainerRegisterRequest featureRequest)
+   at li.qubic.trainer.Trainer.RegisterFeatures()
+2024-03-23 10:45:32	ERROR	Execution stopped(FATAL: Please do not use accessToken AND payoutID)
+
+System.Exception: FATAL: Please do not use accessToken AND payoutID
+   at li.qubic.trainer.Trainer.VerifyStartup()
+   at li.qubic.trainer.Trainer..ctor(String token)
+   at Program.Main(String[] args)
+   at li.qubic.trainer.Trainer.VerifyStartup()
+   at li.qubic.trainer.Trainer..ctor(String token)
+   at Program.Main(String[] args)
+2024-03-23 10:59:37	ERROR	Execution stopped(FATAL: Please do not use accessToken AND payoutID)
+
+System.Exception: FATAL: Please do not use accessToken AND payoutID
+   at li.qubic.trainer.Trainer.VerifyStartup()
+   at li.qubic.trainer.Trainer..ctor(String token)
+   at Program.Main(String[] args)
+   at li.qubic.trainer.Trainer.VerifyStartup()
+   at li.qubic.trainer.Trainer..ctor(String token)
+   at Program.Main(String[] args)

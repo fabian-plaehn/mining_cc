@@ -1,23 +1,15 @@
 {
   "Current_Miner": {
-    "miner_name": "xmrig-cc",
-    "coin_name": "XDAG",
+    "coin_name": "QUBIC",
+    "miner_name": "qli-Client",
     "config": {
-      "pools": [
-        {
-          "algo": null,
-          "url": "de.zephyr.herominers.com:1124",
-          "user": "ZEPHYR2Kur2T72QpzZRqpBRAHXhRT6TLsV2GibYHpubiZYWUpC39gFDW8GYZ9ev4Bd5T7xZN96TWH9ZwZkQ5qRwgKkWBwSsFZRP41",
-          "pass": "x"
-        }
-      ],
-      "http": {
-        "enabled": true,
-        "host": "127.0.0.1",
-        "port": 58001
-      },
-      "randomx": {
-        "random1gb-pages": true
+      "Settings": {
+        "amountOfThreads": 22,
+        "baseUrl": "https://mine.qubic.li/",
+        "allowHwInfoCollect": true,
+        "autoupdateEnabled": true,
+        "accessToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjY0ZTdmNzIyLTA1ZDgtNDNlYy05YTU0LTBlNTljMGUzMGRjOSIsIk1pbmluZyI6IiIsIm5iZiI6MTcxMTE5NjMyMiwiZXhwIjoxNzQyNzMyMzIyLCJpYXQiOjE3MTExOTYzMjIsImlzcyI6Imh0dHBzOi8vcXViaWMubGkvIiwiYXVkIjoiaHR0cHM6Ly9xdWJpYy5saS8ifQ.oJ5MV6Fw5LOYTPOJDvQoMNjYOTgGjjZlTwp9TcC9rAE6UVU7M9WGdSM4xjyn_a6Xreh5u3FyzUhvSgbHlAjyQg",
+        "alias": "DESKTOP-LIJOB68"
       }
     }
   },

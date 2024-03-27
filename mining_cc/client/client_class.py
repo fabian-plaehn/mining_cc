@@ -74,6 +74,7 @@ class Miner:
         except FileNotFoundError: pass
         
         miner_config = merge(miner_config, flight_sheet["config"])
+        print(miner_config)
         with open(config_path, "w") as f:
             json.dump(miner_config, f)
             
@@ -142,7 +143,7 @@ class Miner:
     def report_miner_info(self, thread_id):
         logger("Reporter thread started")
         global current_miner_stats
-        miner_name_to_api_port = {"RTC":58001, "ZEPH":58002, "XDAG":58003, "YDA":58004}
+        global coin_info_dict
         while True:
             try:
                 if thread_id < self.thread_kill: break
@@ -155,11 +156,11 @@ class Miner:
                         try: current_miner_stats = {"name": self.name, "hashrate":float(parsed["hs"]), "time_stamp":time.time()}
                         except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
                         sys.stdout.flush()
-                if self.coin_name in miner_name_to_api_port:
+                if coin_info_dict[self.coin_name].http_port is not None and self.process is not None and self.process.stdout is not None:
                     for std_out_p in self.process.stdout:
                         print(std_out_p)
                         if thread_id < self.thread_kill: break
-                        answer = requests.get(f"http://127.0.0.1:{miner_name_to_api_port[self.name]}/2/summary")
+                        answer = requests.get(f"http://127.0.0.1:{coin_info_dict[self.coin_name].http_port}/2/summary")
                         try: current_miner_stats = {"name": self.coin_name, "hashrate":float(answer.json()["hashrate"]["total"][0]), "time_stamp":time.time()}
                         except: current_miner_stats = {"name": self.coin_name, "hashrate":0, "time_stamp":time.time()}
                         sys.stdout.flush()
@@ -199,6 +200,20 @@ class Miner_Info:
     miner_need_restart_after_config_change: bool
     currently_updating: bool = False
     exec_name: str = "start"
+    
+@dataclass
+class Coin_Info:
+    name: str
+    http_port: int = None
+    
+
+coin_info_dict = {
+                "RTC": Coin_Info("RTC", 58001),
+                "ZEPH": Coin_Info("ZEPH", 58002),
+                "XDAG": Coin_Info("XDAG", 58003),
+                "YDA": Coin_Info("YDA", 58004),
+                "QUBIC": Coin_Info("QUBIC")
+                }
     
 miner_info_dict = {
                 "xmrig-cc": Miner_Info("xmrig-cc", "config.json", False),

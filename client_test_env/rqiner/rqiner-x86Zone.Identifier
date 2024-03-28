@@ -1,0 +1,4 @@
+[ZoneTransfer]
+ZoneId=3
+ReferrerUrl=https://github.com/Qubic-Solutions/rqiner-builds/releases/tag/v0.3.15
+HostUrl=https://objects.githubusercontent.com/github-production-release-asset-2e65be/727825137/fa6e2f47-70ce-4dc7-b17d-766becb50501?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20240328%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20240328T091133Z&X-Amz-Expires=300&X-Amz-Signature=c302a6a59d8df0b5488f494c45a53d2209ba4af15c0cd18b3a9c1444ad22404d&X-Amz-SignedHeaders=host&actor_id=130363835&key_id=0&repo_id=727825137&response-content-disposition=attachment%3B%20filename%3Drqiner-x86&response-content-type=application%2Foctet-stream

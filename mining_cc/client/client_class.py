@@ -6,6 +6,7 @@ import platform
 import queue
 import random
 import shutil
+import signal
 import socket
 import subprocess
 from subprocess import Popen, PIPE, STDOUT
@@ -13,11 +14,13 @@ import sys
 import threading
 import time
 import json
+import fcntl
 import parse
 import keyboard
 import psutil
 import requests
 from dataclasses import dataclass
+from capturer import CaptureOutput
 from mining_cc.shared.hashes import dirhash, single_file_hash
 
 from mining_cc.shared.utils import get_process_id_and_childen, kill_process_and_children, logger, merge, payload_to_dict
@@ -64,24 +67,28 @@ class Miner:
         
         
     def activate(self, flight_sheet):  # payload {"miner_name": miner_name,"coin_name":coin_name, "config": {}}
+        global miner_info_dict
+        logger(f"Activate Miner")
+        
         if flight_sheet == self.current_flight_sheet:
             return
         
-        config_path = os.path.join(os.getcwd(), flight_sheet["miner_name"], miner_info_dict[flight_sheet["miner_name"]].miner_to_settings_name)
-        try:
-            with open(config_path, "rb") as f:
-                miner_config = json.load(f)
-        except FileNotFoundError: pass
-        
-        miner_config = merge(miner_config, flight_sheet["config"])
-        print(miner_config)
-        with open(config_path, "w") as f:
-            json.dump(miner_config, f)
+        if isinstance(miner_info_dict[flight_sheet["miner_name"]].settings_file, str):
+            config_path = os.path.join(os.getcwd(), flight_sheet["miner_name"], miner_info_dict[flight_sheet["miner_name"]].settings_file)
+            try:
+                with open(config_path, "rb") as f:
+                    miner_config = json.load(f)
+            except FileNotFoundError: pass
+            
+            miner_config = merge(miner_config, flight_sheet["config"])
+            print(miner_config)
+            with open(config_path, "w") as f:
+                json.dump(miner_config, f)
             
         self.coin_name = flight_sheet["coin_name"]
         self.current_flight_sheet = flight_sheet
         
-        if self.miner_name == flight_sheet["miner_name"] and miner_info_dict[flight_sheet["miner_name"]].miner_need_restart_after_config_change:
+        if self.miner_name == flight_sheet["miner_name"] and miner_info_dict[flight_sheet["miner_name"]].need_restart_after_config_change:
             self.restart()
         elif self.miner_name != flight_sheet["miner_name"]:
             self.kill()
@@ -105,11 +112,20 @@ class Miner:
                 if not os.path.isfile(excec_path):
                     logger(f"Miner {self.miner_name} not found")
                     return
-                if not self.miner_name == "qli-Client":
-                    self.process = subprocess.Popen("sudo " + excec_path, shell=True, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
-                else:  
-                    #args = [f'{os.path.join(os.getcwd(),self.name,self.exe_name)}', "--threads", "23", "--id", f'CTMDCXFMNNPNIETXBCNHCQUXMUEAYMDRIEEKZUZDNFSYYZYPJBTCFOBGEPAI', "--label", f'{self.config["Settings"]["alias"]}']
-                    self.process = subprocess.Popen(excec_path, cwd=os.path.join(os.getcwd(),self.miner_name), stdin=PIPE, stdout=PIPE, stderr=STDOUT) # , creationflags=CREATE_NEW_CONSOLE)
+                
+                args = []
+                if miner_info_dict[self.miner_name].needs_sudo and os_system == "linux":
+                    args.append("sudo")
+                    pass
+                args.append(excec_path)
+                if isinstance(miner_info_dict[self.miner_name].settings_file, dict):
+                    for key, value in miner_info_dict[self.miner_name].settings_file.items():
+                        args.append(key)
+                        if key in self.current_flight_sheet["config"]: args.append(self.current_flight_sheet["config"][key])
+                        else: args.append(value)
+                print(args)
+                self.process = subprocess.Popen(args, cwd=os.path.join(os.getcwd(),self.miner_name),shell=False, stdout=PIPE, stderr=subprocess.STDOUT) # , creationflags=CREATE_NEW_CONSOLE) # , preexec_fn=os.setpgrp
+
                 print("process started")
             except PermissionError:
                 logger("Permission error")
@@ -117,27 +133,26 @@ class Miner:
                     os.popen(f"sudo chmod u+x {excec_path}")
                     self.start()
         else:
-            pid_list = get_process_id_and_childen(self.process.pid)
+            
+            # get pids list of miner 
+            pid_list = []
+            for process in psutil.process_iter():
+                try:
+                    if self.miner_name in process.exe():
+                        print("found :", process.name(),process.status(), process.pid, process.exe(), process, process.cmdline())
+                        pid_list.append(process.pid)
+                except: pass
+            # ### can be own function
+            
             print(pid_list)
-            if pid_list is None or len(pid_list) < 1:
+            if pid_list is None or len(pid_list) < 2:
                 logger(f"Miner {self.miner_name} not enough processes running")
                 self.restart()
             else:
                 logger(f"Miner {self.miner_name} already running")
                 
     def kill(self):
-        global miner_info_dict
-        for miner_name, _ in miner_info_dict.items():
-            try:
-                for process in psutil.process_iter():
-                    for arg in process.cmdline():
-                        if miner_name in arg:
-                            print("cleaned :", process.name, process.cmdline())
-                            kill_process_and_children(process.pid)
-                    if miner_name in process.exe():
-                        print("cleaned :", process.name, process.exe())
-                        kill_process_and_children(process.pid)
-            except: pass
+        absolut_clean_up()
         self.process = None
         
     def report_miner_info(self, thread_id):
@@ -147,18 +162,18 @@ class Miner:
         while True:
             try:
                 if thread_id < self.thread_kill: break
-                if self.miner_name == "qli-Client" and self.process is not None and self.process.stdout is not None:
-                    for std_out_p in self.process.stdout:
-                        print(std_out_p)
+                if miner_info_dict[self.miner_name].parser is not None:
+                    for line in self.process.stdout:
+                        print(line)
                         if thread_id < self.thread_kill: break
-                        parsed = parse.parse("{date} {time}\tINFO\tE:{epoch} | SOL: {sol}/{sol_total} | Try {id} | {hs} it/s {chunk}\n", std_out_p.decode())
+                        parsed = parse.parse(miner_info_dict[self.miner_name].parser, line.decode())
                         print(parsed)
-                        try: current_miner_stats = {"name": self.name, "hashrate":float(parsed["hs"]), "time_stamp":time.time()}
-                        except: current_miner_stats = {"name": self.name, "hashrate":0, "time_stamp":time.time()}
+                        try: current_miner_stats = {"name": self.coin_name, "hashrate":float(parsed["hs"]), "time_stamp":time.time()}
+                        except: current_miner_stats = {"name": self.coin_name, "hashrate":0, "time_stamp":time.time()}
                         sys.stdout.flush()
-                if coin_info_dict[self.coin_name].http_port is not None and self.process is not None and self.process.stdout is not None:
-                    for std_out_p in self.process.stdout:
-                        print(std_out_p)
+                if coin_info_dict[self.coin_name].http_port:
+                    for line in self.process.stdout:
+                        print(line)
                         if thread_id < self.thread_kill: break
                         answer = requests.get(f"http://127.0.0.1:{coin_info_dict[self.coin_name].http_port}/2/summary")
                         try: current_miner_stats = {"name": self.coin_name, "hashrate":float(answer.json()["hashrate"]["total"][0]), "time_stamp":time.time()}
@@ -166,9 +181,9 @@ class Miner:
                         sys.stdout.flush()
                 time.sleep(1)
             except: pass
-            print("threading")
         logger("Reporter Thread killed")
         
+    
 '''def get_miner_info(name, process) -> dict:
     if name == "QUBIC":
         logger("Listen to STDOUT")
@@ -182,24 +197,39 @@ def report_miner_info(socket, get_miner_info, miner_process):
 def absolut_clean_up():
     global miner_info_dict
     for miner_name, _ in miner_info_dict.items():
-        try:
-            for process in psutil.process_iter():
-                for arg in process.cmdline():
-                    if miner_name in arg:
-                        print("cleaned :", process.name, process.cmdline())
-                        kill_process_and_children(process.pid)
+        for process in psutil.process_iter():
+            try:
                 if miner_name in process.exe():
                     print("cleaned :", process.name, process.exe())
                     kill_process_and_children(process.pid)
-        except: pass
+                    process.send_signal(signal.SIGINT)
+                    #process.terminate()
+                    os.system("sudo kill {}".format(process.pid))
+            except: pass
+    time.sleep(2)
+    '''while True:
+        for miner_name, _ in miner_info_dict.items():
+            for process in psutil.process_iter():
+                try:
+                    if miner_name in process.cmdline():
+                        print("found :", process.name(),process.status(), process.pid, process.exe(), process, process.cmdline())
+                    if miner_name in process.exe():
+                        print("found :", process.name(),process.status(), process.pid, process.exe(), process, process.cmdline())
+                except: pass
+        print("---------")
+        time.sleep(5)'''
+
         
+
 @dataclass
 class Miner_Info:
     name: str
-    miner_to_settings_name: str
-    miner_need_restart_after_config_change: bool
+    settings_file: str
+    need_restart_after_config_change: bool
     currently_updating: bool = False
     exec_name: str = "start"
+    needs_sudo: bool = False
+    parser: str = None
     
 @dataclass
 class Coin_Info:
@@ -216,9 +246,11 @@ coin_info_dict = {
                 }
     
 miner_info_dict = {
-                "xmrig-cc": Miner_Info("xmrig-cc", "config.json", False),
-                "rqiner-x86-znver2": Miner_Info("rqiner-x86-znver2", "cmd_line", True),
-                "qli-Client": Miner_Info("qli-Client", "appsettings.json", True)
+                "xmrig-cc": Miner_Info(name="xmrig-cc", settings_file="config.json", need_restart_after_config_change=False, needs_sudo=True, exec_name="xmrigDaemon"),
+                "rqiner": Miner_Info(name="rqiner", settings_file={"--threads": "32", "--id":None, "--label":None}, need_restart_after_config_change=True, exec_name="rqiner-x86",
+                                     parser="{seed} | Iterrate: {hs} it/s | Average: {avg_its} it/s | Solutions: {sol}\n"),
+                "qli-Client": Miner_Info(name="qli-Client", settings_file="appsettings.json", need_restart_after_config_change=True,
+                                         parser="{date} {time}\tINFO\tE:{epoch} | SOL: {sol}/{sol_total} | Try {id} | {hs} it/s {chunk}\n")
                 }
         
 current_Miner = Miner()
@@ -395,8 +427,6 @@ class Client:
         
 if __name__ == "__main__":
     pass
-
-# TODO -> YDA/RTC/ZEPH/XDAG just need 1 miner just switch config.json
 
 #wget -O qli-Service-install.sh https://dl.qubic.li/cloud-init/qli-Service-install.sh
 #chmod u+x qli-Service-install.sh

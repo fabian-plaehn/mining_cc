@@ -1,15 +1,22 @@
 {
   "Current_Miner": {
-    "coin_name": "QUBIC",
-    "miner_name": "qli-Client",
+    "coin_name": "RTC",
+    "miner_name": "xmrig-cc",
     "config": {
-      "Settings": {
-        "amountOfThreads": 22,
-        "baseUrl": "https://mine.qubic.li/",
-        "allowHwInfoCollect": true,
-        "autoupdateEnabled": true,
-        "accessToken": "eyJhbGciOiJIUzUxMiIsInR5cCI6IkpXVCJ9.eyJJZCI6IjY0ZTdmNzIyLTA1ZDgtNDNlYy05YTU0LTBlNTljMGUzMGRjOSIsIk1pbmluZyI6IiIsIm5iZiI6MTcxMTE5NjMyMiwiZXhwIjoxNzQyNzMyMzIyLCJpYXQiOjE3MTExOTYzMjIsImlzcyI6Imh0dHBzOi8vcXViaWMubGkvIiwiYXVkIjoiaHR0cHM6Ly9xdWJpYy5saS8ifQ.oJ5MV6Fw5LOYTPOJDvQoMNjYOTgGjjZlTwp9TcC9rAE6UVU7M9WGdSM4xjyn_a6Xreh5u3FyzUhvSgbHlAjyQg",
-        "alias": "DESKTOP-LIJOB68"
+      "pools": [
+        {
+          "algo": "ghostrider",
+          "url": "stratum-eu.rplant.xyz:7054",
+          "user": "Rbevx2kyWHCUes2z8Di1QSriKcPKjHRvss.DESKTOP-LIJOB68"
+        }
+      ],
+      "http": {
+        "enabled": true,
+        "host": "127.0.0.1",
+        "port": 58001
+      },
+      "randomx": {
+        "random1gb-pages": true
       }
     }
   },

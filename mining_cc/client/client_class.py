@@ -202,11 +202,10 @@ def absolut_clean_up():
                 if miner_name in process.exe():
                     print("cleaned :", process.name, process.exe())
                     kill_process_and_children(process.pid)
-                    process.send_signal(signal.SIGINT)
+                    #process.send_signal(signal.SIGINT)
                     #process.terminate()
-                    os.system("sudo kill {}".format(process.pid))
+                    #os.system("sudo kill {}".format(process.pid))
             except: pass
-    time.sleep(2)
     '''while True:
         for miner_name, _ in miner_info_dict.items():
             for process in psutil.process_iter():

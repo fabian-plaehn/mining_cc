@@ -1,19 +1,20 @@
 {
   "Current_Miner": {
-    "coin_name": "RTC",
+    "coin_name": "ZEPH",
     "miner_name": "xmrig-cc",
     "config": {
       "pools": [
         {
-          "algo": "ghostrider",
-          "url": "stratum-eu.rplant.xyz:7054",
-          "user": "Rbevx2kyWHCUes2z8Di1QSriKcPKjHRvss.DESKTOP-LIJOB68"
+          "algo": null,
+          "url": "de.zephyr.herominers.com:1123",
+          "user": "ZEPHYR2Kur2T72QpzZRqpBRAHXhRT6TLsV2GibYHpubiZYWUpC39gFDW8GYZ9ev4Bd5T7xZN96TWH9ZwZkQ5qRwgKkWBwSsFZRP41",
+          "pass": "DESKTOP-LIJOB68"
         }
       ],
       "http": {
         "enabled": true,
         "host": "127.0.0.1",
-        "port": 58001
+        "port": 58002
       },
       "randomx": {
         "random1gb-pages": true
